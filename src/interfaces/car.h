@@ -403,17 +403,6 @@ typedef struct CarElt
     int 		RESTART;
     int 		RESET;
 
-
-
-
-// TODO: Ora bisogna verificare che la roba venga mandata e ricevuta via udp.
-// Rifai che manda tutto e verifica che il client java guidi.
-// Quindi aggiungi l'immagine.
-// Solo dopo decidi cosa aggiungere e cosa togliere dalla comunicazione udp
-
-
-
-
     // GIUSE - VISION HERE!!!
     unsigned char	*img;
     unsigned int imgsize;

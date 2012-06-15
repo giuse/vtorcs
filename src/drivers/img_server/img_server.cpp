@@ -111,19 +111,7 @@ newrace(int index, tCarElt* car, tSituation *s)
     if (getTimeout()>0)
     	UDP_TIMEOUT = getTimeout();
 
-//    //Set sensor range
-//    if (strcmp(getVersion(),"2009")==0)
-//    {
-//    	__SENSORS_RANGE__ = 100;
-//    	printf("*****2009*****\n");
-//    }
-//    else if (strcmp(getVersion(),"2010")==0 || strcmp(getVersion(),"2011")==0)
-//        __SENSORS_RANGE__ = 200;
-//    else
-//    {
-//    	printf("%s is not a recognized version",getVersion());
-//    	exit(0);
-//    }
+//    __SENSORS_RANGE__ = 200;
 
     listenSocket[index] = socket(AF_INET, SOCK_DGRAM, 0);
     if (listenSocket[index] < 0)
@@ -153,14 +141,16 @@ newrace(int index, tCarElt* car, tSituation *s)
 
     std::cout << "Waiting for request on port " << getUDPListenPort()+index << "\n";
 
+    clientAddressLength[index] = sizeof(clientAddress[index]);
+//    char line[UDP_MSGLEN];
+
     // Loop until a client identifies correctly
     while (!identified)
     {
 
-        clientAddressLength[index] = sizeof(clientAddress[index]);
-
         // Set line to all zeroes
         memset(line, 0x0, UDP_MSGLEN);
+
         if (recvfrom(listenSocket[index], line, UDP_MSGLEN, 0,
                      (struct sockaddr *) &clientAddress[index],
                      &clientAddressLength[index]) < 0)
@@ -169,34 +159,29 @@ newrace(int index, tCarElt* car, tSituation *s)
             exit(1);
         }
 
-#ifdef __UDP_SERVER_VERBOSE__
-        // show the client's IP address
-        std::cout << "  from " << inet_ntoa(clientAddress[index].sin_addr);
-
-        // show the client's port number.
-        std::cout << ":" << ntohs(clientAddress[index].sin_port) << "\n";
-
-        // Show the line
-        std::cout << "  Received: " << line << "\n";
-#endif
+        #ifdef __UDP_SERVER_VERBOSE__
+        std::cout << "  from " << inet_ntoa(clientAddress[index].sin_addr); // show the client's IP address
+        std::cout << ":" << ntohs(clientAddress[index].sin_port) << "\n";   // show the client's port number.
+        std::cout << "  Received: " << line << "\n";                        // show the line
+        #endif
 
         // compare received string with the ID
         if (strncmp(line,UDP_ID,3)==0)
         {
-#ifdef __UDP_SERVER_VERBOSE__
-            std::cout << "IDENTIFIED" << std::endl;
-#endif
             std::string initStr(line);
+            sprintf(line,"***identified***");
+
 //            if (SimpleParser::parse(initStr,std::string("init"),trackSensAngle[index],19)==false)
 //            	for (int i = 0; i < 19; ++i)
 //            		trackSensAngle[index][i] =-90 + 10*i;
-            char line[UDP_MSGLEN];
-            sprintf(line,"***identified***");
+
             // Sending the car state to the client
             if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
                        (struct sockaddr *) &clientAddress[index],
-                       sizeof(clientAddress[index])) < 0)
+                       sizeof(clientAddress[index])) 
+                < 0)
                 std::cerr << "Error: cannot send identification message";
+
             identified=true;
         }
     }
@@ -225,10 +210,12 @@ drive(int index, tCarElt* car, tSituation *s)
 
     float wheelSpinVel[4];
     for (int i=0; i<4; ++i)
-        wheelSpinVel[i] = car->_wheelSpinVel(i);
+      wheelSpinVel[i] = car->_wheelSpinVel(i);
 
     if (prevDist[index]<0)
       prevDist[index] = car->race.distFromStartLine;
+
+// GIUSE TODO: add a TOTAL distance from start line
 
     float curDistRaced = car->race.distFromStartLine - prevDist[index];
     prevDist[index] = car->race.distFromStartLine;

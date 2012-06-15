@@ -134,7 +134,7 @@ SimpleParser::stringify(string tag, unsigned char *value, int size)
 	STR << "(" << tag;
 	for (int i = 0; i < size; ++i) 
 	{
-		STR << " " << value[i];
+		STR << " " << (int)value[i];
 	}
 	STR << ")";
 	return STR.str();

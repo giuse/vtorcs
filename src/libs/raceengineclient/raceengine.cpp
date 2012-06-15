@@ -131,8 +131,9 @@ visionUpdate()
       (ReInfo->vision.sw - ReInfo->vision.vw) / 2, 
       (ReInfo->vision.sh - ReInfo->vision.vh) / 2, 
       ReInfo->vision.vw,  ReInfo->vision.vh, 
-      GL_LUMINANCE, GL_UNSIGNED_BYTE, 
-      (GLvoid*)ReInfo->vision.img);
+      GL_RGB, GL_UNSIGNED_BYTE, //GL_LUMINANCE
+      (GLvoid*)ReInfo->vision.img
+    );
 }
 
 
@@ -148,7 +149,7 @@ ReManage(tCarElt *car)
 	tReCarInfo *info = &(ReInfo->_reCarInfo[car->index]);
 	
 	// GIUSE: VISION HERE!!
-	// GIUSE: TODO: this assignment needs to be done ONLY ONCE!! TAKE THIS OUT!
+	// GIUSE: TODO: this assignment needs to be done ONLY ONCE!! TAKE THIS OUT somehow!
   car->img = ReInfo->vision.img;
   car->imgsize = ReInfo->vision.sh * ReInfo->vision.sw;
 	visionUpdate();
@@ -642,8 +643,8 @@ ReStart(void)
     ReInfo->vision.capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
     GfScrGetSize(&ReInfo->vision.sw, &ReInfo->vision.sh, &ReInfo->vision.vw, &ReInfo->vision.vh);
 
-    // GIUSE - luminance (greyscale) image is sufficient - triple the size if you switch back to RGB
-    ReInfo->vision.img = (unsigned char*)malloc(ReInfo->vision.vw * ReInfo->vision.vh);
+    // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
+    ReInfo->vision.img = (unsigned char*)malloc(ReInfo->vision.vw * ReInfo->vision.vh *3);
     if (ReInfo->vision.img == NULL)  exit(-1); // malloc fail
     visionUpdate(); // put first image
 }

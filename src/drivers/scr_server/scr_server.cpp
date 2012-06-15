@@ -60,11 +60,11 @@ typedef struct sockaddr_in tSockAddrIn;
 #endif
 
 /*** defines for UDP *****/
-// GIUSE devo fargli avere la porta via argomento DAL MA
+// GIUSE - port is now provided from command line (torcs -p 3001)
 //#define UDP_LISTEN_PORT 3001
 #define UDP_ID "SCR"
 #define UDP_DEFAULT_TIMEOUT 10000
-#define UDP_MSGLEN 1000
+#define UDP_MSGLEN 350000
 //#define __UDP_SERVER_VERBOSE__
 /************************/
 
@@ -293,7 +293,7 @@ newrace(int index, tCarElt* car, tSituation *s)
             		trackSensAngle[index][i] =-90 + 10*i;
 				}
             }
-            char line[UDP_MSGLEN];
+//            char line[UDP_MSGLEN];
             sprintf(line,"***identified***");
             // Sending the car state to the client
             if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
@@ -329,6 +329,7 @@ drive(int index, tCarElt* car, tSituation *s)
 {
 
     total_tics[index]++;
+   	char line[UDP_MSGLEN];
 
 #ifdef __PRINT_RACE_RESULTS__
     bestLap[index]=car->_bestLapTime;
@@ -341,7 +342,6 @@ drive(int index, tCarElt* car, tSituation *s)
     if (RESTARTING[index]==1)
     {
 
-	char line[101];
         clientAddressLength[index] = sizeof(clientAddress[index]);
 
         // Set line to all zeroes
@@ -371,7 +371,7 @@ drive(int index, tCarElt* car, tSituation *s)
   #ifdef __UDP_SERVER_VERBOSE__
             std::cout << "IDENTIFIED" << std::endl;
   #endif
-            char line[UDP_MSGLEN];
+//            char line[UDP_MSGLEN];
             sprintf(line,"***identified***");
             // Sending the car state to the client
             if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
@@ -500,16 +500,21 @@ drive(int index, tCarElt* car, tSituation *s)
     stateString += SimpleParser::stringify("trackPos", dist_to_middle);
     stateString += SimpleParser::stringify("wheelSpinVel", wheelSpinVel, 4);
     stateString += SimpleParser::stringify("z", car->_pos_Z  - RtTrackHeightL(&(car->_trkPos)));
-	stateString += SimpleParser::stringify("focus", focusSensorOut, 5);//ML
+    stateString += SimpleParser::stringify("focus", focusSensorOut, 5);//ML
+    
+    printf("size: %d\n",car->imgsize);
+    stateString += SimpleParser::stringify("img", car->img, car->imgsize);//GIUSE - VISION HERE!
 
-    char line[UDP_MSGLEN];
-    sprintf(line,"%s",stateString.c_str());
+//    char line[UDP_MSGLEN];
+//    sprintf(line,"%s",stateString.c_str());
 
 if (RESTARTING[index]==0)
 {
 #ifdef __UDP_SERVER_VERBOSE__
 
-    std::cout << "Sending: " << line << std::endl;
+    std::cout << "Sending: " << stateString.c_str() << std::endl;
+    std::cout << "Sending: " << stateString.c_str() << std::endl;
+
 #endif
 
 #ifdef __STEP_LIMIT__
@@ -534,7 +539,8 @@ if (RESTARTING[index]==0)
 	
 
     // Sending the car state to the client
-    if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
+//    if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
+    if (sendto(listenSocket[index], stateString.c_str(), stateString.length() + 1, 0,
                (struct sockaddr *) &clientAddress[index],
                sizeof(clientAddress[index])) < 0)
         std::cerr << "Error: cannot send car state";
@@ -545,12 +551,12 @@ if (RESTARTING[index]==0)
     FD_SET(listenSocket[index], &readSet);
     timeVal.tv_sec = 0;
     timeVal.tv_usec = UDP_TIMEOUT;
-    memset(line, 0x0,1000 );
+    memset(line, 0x0,UDP_MSGLEN ); // GIUSE - BUG, THERE WAS A 1000 HARDCODED
 
     if (select(listenSocket[index]+1, &readSet, NULL, NULL, &timeVal))
     {
         // Read the client controller action
-        memset(line, 0x0,UDP_MSGLEN );  // Zero out the buffer.
+//        memset(line, 0x0,UDP_MSGLEN );  // Zero out the buffer. GIUSE - already done
         int numRead = recv(listenSocket[index], line, UDP_MSGLEN, 0);
         if (numRead < 0)
         {
@@ -569,7 +575,8 @@ if (RESTARTING[index]==0)
         {
          	RESTARTING[index] = 1;
 #ifdef __DISABLE_RESTART__
-	        char line[UDP_MSGLEN];
+//	        char line[UDP_MSGLEN];
+          memset(line, 0x0,UDP_MSGLEN );
         	sprintf(line,"***restart***");
         	// Sending the car state to the client
         	if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
@@ -646,6 +653,10 @@ static void
 shutdown(int index)
 {
 
+   	char line[UDP_MSGLEN];
+    memset(line, 0x0,UDP_MSGLEN );
+
+
 #ifdef __PRINT_RACE_RESULTS__
 #define  max_pos 8
 int points[]={10,8,6,5,4,3,2,1};
@@ -689,7 +700,7 @@ if (curPosition==max_pos)
     if (RESTARTING[index]!=1)
     {
 
-        char line[UDP_MSGLEN];
+//        char line[UDP_MSGLEN];
         sprintf(line,"***shutdown***");
         // Sending the car state to the client
         if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
@@ -699,7 +710,7 @@ if (curPosition==max_pos)
     }
     else
     {
-        char line[UDP_MSGLEN];
+//        char line[UDP_MSGLEN];
         sprintf(line,"***restart***");
         // Sending the car state to the client
         if (sendto(listenSocket[index], line, strlen(line) + 1, 0,
