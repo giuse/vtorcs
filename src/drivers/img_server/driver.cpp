@@ -122,7 +122,7 @@ void Driver::followcenter(tCarElt* car)
     car->ctrl.accelCmd = 0.8; // accelerator pedal
     car->ctrl.brakeCmd = 0.0; // no brakes
 
-    printf("%d ", car->img[1]);
+    printf("%d ", car->vision->img[1]);
 
 //    printf("Lap: %d", car->_laps);
 //    std::cout << "Lap: " << car->_lap << std::endl;

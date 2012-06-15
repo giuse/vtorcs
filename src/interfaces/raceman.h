@@ -180,28 +180,20 @@ typedef struct RmCarRules
     int			ruleState;
 } tRmCarRules;
 
-typedef struct RmMovieCapture
-{
-    int		enabled;
-    int		state;
-    double	deltaSimu;
-    double	deltaFrame;
-    double	lastFrame;
-    char	*outputBase;
-    int		currentCapture;
-    int		currentFrame;
-} tRmMovieCapture;
 
-
-// GIUSE - VISION HERE!
-
-typedef struct RmVisionImg
-{
-    int	 sw, sh, vw, vh;
-    tRmMovieCapture	*capture; // just a shorthand
-    unsigned char* img;
-
-} tRmVisionImg;
+// GIUSE - MOVED TO CAR.H FOR VISUAL PURPOSES
+// IT'S STILL INCLUDED IN THE HEAD OF THIS FILE SO NO PROBLEM
+//typedef struct RmMovieCapture
+//{
+//    int		enabled;
+//    int		state;
+//    double	deltaSimu;
+//    double	deltaFrame;
+//    double	lastFrame;
+//    char	*outputBase;
+//    int		currentCapture;
+//    int		currentFrame;
+//} tRmMovieCapture;
 
 /**
  * Race Manager General Info
@@ -218,7 +210,7 @@ typedef struct RmInfo
     tRaceEngineInfo	raceEngineInfo;
     tRmMovieCapture	movieCapture;
     // GIUSE - VISION HERE!
-    tRmVisionImg vision;
+    tRmVisionImg* vision;
 } tRmInfo;
 
 /*

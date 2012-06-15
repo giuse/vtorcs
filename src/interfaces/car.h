@@ -386,6 +386,32 @@ typedef struct
 #define _pitStopType	pitcmd.stopType
 
 
+
+// GIUSE - VISION HERE!
+// GIUSE - MOVED HERE FROM RACEMAN.H
+typedef struct RmMovieCapture
+{
+    int		enabled;
+    int		state;
+    double	deltaSimu;
+    double	deltaFrame;
+    double	lastFrame;
+    char	*outputBase;
+    int		currentCapture;
+    int		currentFrame;
+} tRmMovieCapture;
+
+// Visual information for the car - img represents the present screenshot
+typedef struct RmVisionImg
+{
+    int	 sw, sh, vw, vh;
+//    tRmMovieCapture* capture; // just a shorthand: ReInfo->vision.capture = &(ReInfo->movieCapture); (raceengine.cpp)
+    unsigned int imgsize;
+    unsigned char* img;
+
+} tRmVisionImg;
+
+
 /** Car structure (tCarElt).
     This is the main car structure, used everywhere in the code.
 */
@@ -404,8 +430,7 @@ typedef struct CarElt
     int 		RESET;
 
     // GIUSE - VISION HERE!!!
-    unsigned char	*img;
-    unsigned int imgsize;
+    tRmVisionImg* vision; // it's ugly, but I need it to be a pointer to share it with the car
 } tCarElt;
 
 

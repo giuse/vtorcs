@@ -323,6 +323,10 @@ newrace(int index, tCarElt* car, tSituation *s)
     prevDist[index]=-1;
 }
 
+
+
+
+
 /* Drive during race. */
 static void
 drive(int index, tCarElt* car, tSituation *s)
@@ -473,6 +477,11 @@ drive(int index, tCarElt* car, tSituation *s)
 
     distRaced[index] += curDistRaced;
 
+    float totdist = curTrack->length * (car->race.laps -1) + car->race.distFromStartLine;
+    
+//    fprintf("totraced: %d\n",totdist);
+    std::cerr << "totraced: " << totdist << std::endl;
+
     /**********************************************************************
      ****************** Building state string *****************************
      **********************************************************************/
@@ -481,11 +490,9 @@ drive(int index, tCarElt* car, tSituation *s)
 
     stateString =  SimpleParser::stringify("angle", angle);
     stateString += SimpleParser::stringify("curLapTime", float(car->_curLapTime));
-    if (getDamageLimit())
-	    stateString += SimpleParser::stringify("damage", car->_dammage);
-    else
-	    stateString += SimpleParser::stringify("damage", car->_fakeDammage);
+    stateString += SimpleParser::stringify("damage",        ( getDamageLimit() ? car->_dammage : car->_fakeDammage ) );
     stateString += SimpleParser::stringify("distFromStart", car->race.distFromStartLine);
+    stateString += SimpleParser::stringify("totalDistFromStart", totdist);
     stateString += SimpleParser::stringify("distRaced", distRaced[index]);
     stateString += SimpleParser::stringify("fuel", car->_fuel);
     stateString += SimpleParser::stringify("gear", car->_gear);
@@ -501,13 +508,17 @@ drive(int index, tCarElt* car, tSituation *s)
     stateString += SimpleParser::stringify("wheelSpinVel", wheelSpinVel, 4);
     stateString += SimpleParser::stringify("z", car->_pos_Z  - RtTrackHeightL(&(car->_trkPos)));
     stateString += SimpleParser::stringify("focus", focusSensorOut, 5);//ML
-    
-//    printf("size: %d\n",car->imgsize);
+
+    //GIUSE - VISION HERE!    
+//    printf("size: %d\n",car->vision->imgsize);
+
     if( getVision() ){
-      stateString += SimpleParser::stringify("img", car->img, car->imgsize); //GIUSE - VISION HERE!
+      stateString += SimpleParser::stringify("img", car->vision->img, car->vision->imgsize);
     }
     
+  // GIUSE - that's UGLY, can we stay coherent with either char* or string??
 //    char line[UDP_MSGLEN];
+//    memset(line, 0x0,UDP_MSGLEN ); //
 //    sprintf(line,"%s",stateString.c_str());
 
 if (RESTARTING[index]==0)

@@ -128,11 +128,12 @@ visionUpdate()
 //    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)ReInfo.vision->img);
 // documentation: http://www.opengl.org/sdk/docs/man/xhtml/glReadPixels.xml
     glReadPixels(
-      (ReInfo->vision.sw - ReInfo->vision.vw) / 2, 
-      (ReInfo->vision.sh - ReInfo->vision.vh) / 2, 
-      ReInfo->vision.vw,  ReInfo->vision.vh, 
-      GL_RGB, GL_UNSIGNED_BYTE, //GL_LUMINANCE
-      (GLvoid*)ReInfo->vision.img
+//      (ReInfo->vision->sw - ReInfo->vision->vw) / 2, 
+//      (ReInfo->vision->sh - ReInfo->vision->vh) / 2, 
+//      ReInfo->vision->vw,  ReInfo->vision->vh, 
+      10,10,10,10,
+      GL_RGB /*GL_LUMINANCE?*/, GL_UNSIGNED_BYTE,
+      (GLvoid*)ReInfo->vision->img
     );
 }
 
@@ -151,8 +152,7 @@ ReManage(tCarElt *car)
 	// GIUSE: VISION HERE!!
   if( getVision() ){
 	  // GIUSE: TODO: this assignment needs to be done ONLY ONCE!! TAKE THIS OUT somehow!
-    car->img = ReInfo->vision.img;
-    car->imgsize = ReInfo->vision.sh * ReInfo->vision.sw;
+    car->vision = ReInfo->vision;
 	  visionUpdate();
   }
   
@@ -643,13 +643,20 @@ ReStart(void)
     ReInfo->_reRunning = 1;
     ReInfo->_reCurTime = GfTimeClock() - RCM_MAX_DT_SIMU;
 
+    // fill the vision structure
     if( getVision() ){
-      ReInfo->vision.capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
-      GfScrGetSize(&ReInfo->vision.sw, &ReInfo->vision.sh, &ReInfo->vision.vw, &ReInfo->vision.vh);
+      ReInfo->vision = (tRmVisionImg*) malloc( sizeof(tRmVisionImg) );
+      
+//      ReInfo->vision->capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
+      GfScrGetSize(&ReInfo->vision->sw, &ReInfo->vision->sh, &ReInfo->vision->vw, &ReInfo->vision->vh);
+
+//      printf( "sw %d - sh %d - vw %d - vh %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh);
+//    640 480 640 480
 
       // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
-      ReInfo->vision.img = (unsigned char*)malloc(ReInfo->vision.vw * ReInfo->vision.vh *3);
-      if (ReInfo->vision.img == NULL)  exit(-1); // malloc fail
+      ReInfo->vision->imgsize = 100;//ReInfo->vision->vw * ReInfo->vision->vh *3;
+      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize);
+      if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
       visionUpdate(); // put first image
     }
 }
@@ -659,7 +666,7 @@ ReStop(void)
 {
     ReInfo->_reRunning = 0;
     if( getVision() ){
-      free(ReInfo->vision.img);
+      free(ReInfo->vision->img);
     }
 }
 
