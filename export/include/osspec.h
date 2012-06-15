@@ -1,1 +1,1 @@
-/home/giuse/torcs-1.3.1/src/linux/osspec.h
+/home/giuse/torcs-visual-server/src/linux/osspec.h

@@ -1,2 +1,2 @@
-TORCS_BASE = /home/koutnij/work/torcs-1.3.1
-MAKE_DEFAULT = /home/koutnij/work/torcs-1.3.1/Make-default.mk
+TORCS_BASE = /home/giuse/torcs-visual-server
+MAKE_DEFAULT = /home/giuse/torcs-visual-server/Make-default.mk
