@@ -647,6 +647,11 @@ extern char* getVersion();
 extern void setUDPListenPort(int port);
 extern int getUDPListenPort();
 
+// GIUSE - VISION HERE! ACTIVATE IMAGE GENERATION (and send them to clients if specified in the car/server)
+extern void setVision(bool vis);
+extern int getVision();
+
+
 #endif /* __TGF__H__ */
 
 

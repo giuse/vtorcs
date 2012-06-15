@@ -110,6 +110,11 @@ init_args(int argc, char **argv)
 		    setUDPListenPort(atoi(argv[i]));
         i++;
 		    printf("UDP Listen Port set to %d!\n", getUDPListenPort()); 
+  // GIUSE - VISION HERE! ACTIVATE IMAGE GENERATION (and send them to clients if specified in the car/server)
+	} else if (strncmp(argv[i], "-vision", 4) == 0) {
+		    i++;
+		    setVision(true);
+		    printf("Image generation is ON!\n"); 
 		     
 #ifndef FREEGLUT
 	} else if (strncmp(argv[i], "-m", 2) == 0) {

@@ -149,10 +149,13 @@ ReManage(tCarElt *car)
 	tReCarInfo *info = &(ReInfo->_reCarInfo[car->index]);
 	
 	// GIUSE: VISION HERE!!
-	// GIUSE: TODO: this assignment needs to be done ONLY ONCE!! TAKE THIS OUT somehow!
-  car->img = ReInfo->vision.img;
-  car->imgsize = ReInfo->vision.sh * ReInfo->vision.sw;
-	visionUpdate();
+  if( getVision() ){
+	  // GIUSE: TODO: this assignment needs to be done ONLY ONCE!! TAKE THIS OUT somehow!
+    car->img = ReInfo->vision.img;
+    car->imgsize = ReInfo->vision.sh * ReInfo->vision.sw;
+	  visionUpdate();
+  }
+  
 	
 	if (car->_speed_x > car->_topSpeed) {
 		car->_topSpeed = car->_speed_x;
@@ -640,20 +643,24 @@ ReStart(void)
     ReInfo->_reRunning = 1;
     ReInfo->_reCurTime = GfTimeClock() - RCM_MAX_DT_SIMU;
 
-    ReInfo->vision.capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
-    GfScrGetSize(&ReInfo->vision.sw, &ReInfo->vision.sh, &ReInfo->vision.vw, &ReInfo->vision.vh);
+    if( getVision() ){
+      ReInfo->vision.capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
+      GfScrGetSize(&ReInfo->vision.sw, &ReInfo->vision.sh, &ReInfo->vision.vw, &ReInfo->vision.vh);
 
-    // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
-    ReInfo->vision.img = (unsigned char*)malloc(ReInfo->vision.vw * ReInfo->vision.vh *3);
-    if (ReInfo->vision.img == NULL)  exit(-1); // malloc fail
-    visionUpdate(); // put first image
+      // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
+      ReInfo->vision.img = (unsigned char*)malloc(ReInfo->vision.vw * ReInfo->vision.vh *3);
+      if (ReInfo->vision.img == NULL)  exit(-1); // malloc fail
+      visionUpdate(); // put first image
+    }
 }
 
 void
 ReStop(void)
 {
     ReInfo->_reRunning = 0;
-    free(ReInfo->vision.img);
+    if( getVision() ){
+      free(ReInfo->vision.img);
+    }
 }
 
 static void

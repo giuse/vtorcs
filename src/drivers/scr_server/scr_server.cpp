@@ -502,9 +502,11 @@ drive(int index, tCarElt* car, tSituation *s)
     stateString += SimpleParser::stringify("z", car->_pos_Z  - RtTrackHeightL(&(car->_trkPos)));
     stateString += SimpleParser::stringify("focus", focusSensorOut, 5);//ML
     
-    printf("size: %d\n",car->imgsize);
-    stateString += SimpleParser::stringify("img", car->img, car->imgsize);//GIUSE - VISION HERE!
-
+//    printf("size: %d\n",car->imgsize);
+    if( getVision() ){
+      stateString += SimpleParser::stringify("img", car->img, car->imgsize); //GIUSE - VISION HERE!
+    }
+    
 //    char line[UDP_MSGLEN];
 //    sprintf(line,"%s",stateString.c_str());
 

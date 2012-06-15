@@ -36,7 +36,10 @@ extern void gfRlstInit(void);
 
 static bool __TEXT_ONLY__;
 static bool __NOISY__;
-static int __UDP_LISTEN_PORT__ = 3101; // GIUSE - UDP LISTEN PORT (with default port)
+// GIUSE - UDP LISTEN PORT (with default port)
+static int __UDP_LISTEN_PORT__ = 3101;
+// GIUSE - ACTIVATE VISION (default: no)
+static bool __VISION__ = false;
 
 void setTextOnly(bool value)
 {
@@ -65,6 +68,17 @@ int getUDPListenPort()
 {
   return __UDP_LISTEN_PORT__;
 }
+
+// GIUSE - VISION HERE! ACTIVATE IMAGE GENERATION (and send them to clients if specified in the car/server)
+void setVision(bool vis)
+{
+  __VISION__ = vis;
+}
+int getVision()
+{
+  return __VISION__;
+}
+
 
 #ifdef WIN32
 #include <crtdbg.h>
