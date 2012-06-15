@@ -193,6 +193,16 @@ typedef struct RmMovieCapture
 } tRmMovieCapture;
 
 
+// GIUSE - VISION HERE!
+
+typedef struct RmVisionImg
+{
+    int	 sw, sh, vw, vh;
+    tRmMovieCapture	*capture; // just a shorthand
+    unsigned char* img;
+
+} tRmVisionImg;
+
 /**
  * Race Manager General Info
  */
@@ -207,6 +217,8 @@ typedef struct RmInfo
     tRmCarRules		*rules;		/**< by car rules */
     tRaceEngineInfo	raceEngineInfo;
     tRmMovieCapture	movieCapture;
+    // GIUSE - VISION HERE!
+    tRmVisionImg vision;
 } tRmInfo;
 
 /*

@@ -38,6 +38,9 @@ public:
 
         static string  stringify(string tag, float *value, int size);
 
+        // GIUSE - stringify images
+        static string  stringify(string tag, unsigned char *value, int size); 
+
 };
 
 #endif /*SIMPLEPARSER_H_*/

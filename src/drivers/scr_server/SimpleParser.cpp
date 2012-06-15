@@ -126,3 +126,16 @@ SimpleParser::stringify(string tag, float *value, int size)
 	STR << ")";
 	return STR.str();
 }
+
+string 
+SimpleParser::stringify(string tag, unsigned char *value, int size)
+{
+	ostringstream STR;
+	STR << "(" << tag;
+	for (int i = 0; i < size; ++i) 
+	{
+		STR << " " << value[i];
+	}
+	STR << ")";
+	return STR.str();
+}

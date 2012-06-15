@@ -336,6 +336,7 @@ drive(int index, tCarElt* car, tSituation *s)
     totalTime[index]=car->_timeBehindLeader;
 #endif
 
+
 #ifdef __DISABLE_RESTART__
     if (RESTARTING[index]==1)
     {
@@ -353,7 +354,7 @@ drive(int index, tCarElt* car, tSituation *s)
             exit(1);
         }
 
-#ifdef __UDP_SERVER_VERBOSE__
+  #ifdef __UDP_SERVER_VERBOSE__
         // show the client's IP address
         std::cout << "  from " << inet_ntoa(clientAddress[index].sin_addr);
 
@@ -362,14 +363,14 @@ drive(int index, tCarElt* car, tSituation *s)
 
         // Show the line
         std::cout << "  Received: " << line << "\n";
-#endif
+  #endif
 
         // compare received string with the ID
         if (strncmp(line,UDP_ID,3)==0)
         {
-#ifdef __UDP_SERVER_VERBOSE__
+  #ifdef __UDP_SERVER_VERBOSE__
             std::cout << "IDENTIFIED" << std::endl;
-#endif
+  #endif
             char line[UDP_MSGLEN];
             sprintf(line,"***identified***");
             // Sending the car state to the client
