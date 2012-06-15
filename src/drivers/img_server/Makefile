@@ -16,7 +16,7 @@
 ROBOT       = img_server
 MODULE      = ${ROBOT}.so
 MODULEDIR   = drivers/${ROBOT}
-SOURCES     = ${ROBOT}.cpp driver.cpp
+SOURCES     = ${ROBOT}.cpp driver.cpp #SimpleParser.cpp # TAKEN FROM SCR_SERVER!!
 
 SHIPDIR     = drivers/${ROBOT}
 SHIP        = ${ROBOT}.xml cg-nascar-rwd.rgb logo.rgb

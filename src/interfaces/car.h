@@ -402,8 +402,10 @@ typedef struct CarElt
     struct CarElt	*next;
     int 		RESTART;
     int 		RESET;
+
     // GIUSE - VISION HERE!!!
     unsigned char	*img;
+    unsigned int imgsize;
 } tCarElt;
 
 

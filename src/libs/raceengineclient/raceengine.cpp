@@ -120,27 +120,20 @@ ReRaceBigMsgSet(char *msg, double life)
 
 // GIUSE - VISION HERE!!!
 static void
-carcapture(tCarElt *car)
+visionUpdate()
 {
-    int			sw, sh, vw, vh;
-    tRmMovieCapture	*capture = &(ReInfo->movieCapture);
-    
-    GfScrGetSize(&sw, &sh, &vw, &vh);
-    //GIUSE TODO: move out!
-    car->img = (unsigned char*)malloc(vw * vh * 3);
-    if (car->img == NULL) {
-      return;
-    }
-    
     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadBuffer(GL_FRONT);
-    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)car->img);
-
-//    sprintf(buf, "%s/torcs-%4.4d-%8.8d.png", capture->outputBase, capture->currentCapture, capture->currentFrame++);
-//    GfImgWritePng(img, buf, vw, vh);
-    //GIUSE TODO: move out!
-    free(car->img);
+//    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)ReInfo.vision->img);
+// documentation: http://www.opengl.org/sdk/docs/man/xhtml/glReadPixels.xml
+    glReadPixels(
+      (ReInfo->vision.sw - ReInfo->vision.vw) / 2, 
+      (ReInfo->vision.sh - ReInfo->vision.vh) / 2, 
+      ReInfo->vision.vw,  ReInfo->vision.vh, 
+      GL_RGB, GL_UNSIGNED_BYTE, //GL_LUMINANCE
+      (GLvoid*)ReInfo->vision.img
+    );
 }
 
 
@@ -156,7 +149,10 @@ ReManage(tCarElt *car)
 	tReCarInfo *info = &(ReInfo->_reCarInfo[car->index]);
 	
 	// GIUSE: VISION HERE!!
-	//carcapture(car);
+	// GIUSE: TODO: this assignment needs to be done ONLY ONCE!! TAKE THIS OUT somehow!
+  car->img = ReInfo->vision.img;
+  car->imgsize = ReInfo->vision.sh * ReInfo->vision.sw;
+	visionUpdate();
 	
 	if (car->_speed_x > car->_topSpeed) {
 		car->_topSpeed = car->_speed_x;
@@ -643,12 +639,21 @@ ReStart(void)
 {
     ReInfo->_reRunning = 1;
     ReInfo->_reCurTime = GfTimeClock() - RCM_MAX_DT_SIMU;
+
+    ReInfo->vision.capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
+    GfScrGetSize(&ReInfo->vision.sw, &ReInfo->vision.sh, &ReInfo->vision.vw, &ReInfo->vision.vh);
+
+    // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
+    ReInfo->vision.img = (unsigned char*)malloc(ReInfo->vision.vw * ReInfo->vision.vh *3);
+    if (ReInfo->vision.img == NULL)  exit(-1); // malloc fail
+    visionUpdate(); // put first image
 }
 
 void
 ReStop(void)
 {
     ReInfo->_reRunning = 0;
+    free(ReInfo->vision.img);
 }
 
 static void
