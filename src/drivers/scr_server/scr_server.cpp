@@ -480,7 +480,7 @@ drive(int index, tCarElt* car, tSituation *s)
     float totdist = curTrack->length * (car->race.laps -1) + car->race.distFromStartLine;
     
 //    fprintf("totraced: %d\n",totdist);
-    std::cerr << "totraced: " << totdist << std::endl;
+//    std::cerr << "totraced: " << totdist << std::endl;
 
     /**********************************************************************
      ****************** Building state string *****************************
