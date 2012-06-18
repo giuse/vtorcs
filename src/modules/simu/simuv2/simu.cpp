@@ -162,150 +162,159 @@ SimReConfig(tCarElt *carElt)
 static void
 RemoveCar(tCar *car, tSituation *s)
 {
-	int i;
-	tCarElt *carElt;
-	tTrkLocPos trkPos;
-	int trkFlag;
-	tdble travelTime;
-	tdble dang;
+// GIUSE: VISION HERE!!
+// Well, actually it's for evolution purposes: we don't want the server to shut down,
+// so the cars have to be invulnerable even if the damage is still counted - it's only
+// used as a negative reinforcement, but we do want our individuals to fairly run to
+// the end of the episode.
+// Commenting the whole function like this is a ugly quick hack, but serves the purpose
+// TODO: make another command line argument for car invulnerability, uncomment the function,
+//       and put all function calls in an "if not invulnerable then"
 
-	static tdble PULL_Z_OFFSET = 3.0;
-	static tdble PULL_SPD = 0.5;
+//	int i;
+//	tCarElt *carElt;
+//	tTrkLocPos trkPos;
+//	int trkFlag;
+//	tdble travelTime;
+//	tdble dang;
 
-	carElt = car->carElt;
+//	static tdble PULL_Z_OFFSET = 3.0;
+//	static tdble PULL_SPD = 0.5;
 
-	if (carElt->_state & RM_CAR_STATE_PULLUP) {
-		carElt->_pos_Z += car->restPos.vel.z * SimDeltaTime;
-		carElt->_yaw += car->restPos.vel.az * SimDeltaTime;
-		carElt->_roll += car->restPos.vel.ax * SimDeltaTime;
-		carElt->_pitch += car->restPos.vel.ay * SimDeltaTime;
-		sgMakeCoordMat4(carElt->pub.posMat, carElt->_pos_X, carElt->_pos_Y, carElt->_pos_Z - carElt->_statGC_z,
-			RAD2DEG(carElt->_yaw), RAD2DEG(carElt->_roll), RAD2DEG(carElt->_pitch));
+//	carElt = car->carElt;
 
-		if (carElt->_pos_Z > (car->restPos.pos.z + PULL_Z_OFFSET)) {
-			carElt->_state &= ~RM_CAR_STATE_PULLUP;
-			carElt->_state |= RM_CAR_STATE_PULLSIDE;
+//	if (carElt->_state & RM_CAR_STATE_PULLUP) {
+//		carElt->_pos_Z += car->restPos.vel.z * SimDeltaTime;
+//		carElt->_yaw += car->restPos.vel.az * SimDeltaTime;
+//		carElt->_roll += car->restPos.vel.ax * SimDeltaTime;
+//		carElt->_pitch += car->restPos.vel.ay * SimDeltaTime;
+//		sgMakeCoordMat4(carElt->pub.posMat, carElt->_pos_X, carElt->_pos_Y, carElt->_pos_Z - carElt->_statGC_z,
+//			RAD2DEG(carElt->_yaw), RAD2DEG(carElt->_roll), RAD2DEG(carElt->_pitch));
 
-			// Moved pullside velocity computation down due to floating point error accumulation.
-		}
-		return;
-	}
+//		if (carElt->_pos_Z > (car->restPos.pos.z + PULL_Z_OFFSET)) {
+//			carElt->_state &= ~RM_CAR_STATE_PULLUP;
+//			carElt->_state |= RM_CAR_STATE_PULLSIDE;
 
-
-	if (carElt->_state & RM_CAR_STATE_PULLSIDE) {
-		// Recompute speed to avoid missing the parking point due to error accumulation (the pos might be
-		// in the 0-10000 range, depending on the track and vel*dt is around 0-0.001, so basically all
-		// but the most significant digits are lost under bad conditions, happens e.g on e-track-4).
-		// Should not lead to a division by zero because the pullside process stops if the car is within
-		// [0.5, 0.5]. Do not move it back.
-		travelTime = DIST(car->restPos.pos.x, car->restPos.pos.y, carElt->_pos_X, carElt->_pos_Y) / PULL_SPD;
-		car->restPos.vel.x = (car->restPos.pos.x - carElt->_pos_X) / travelTime;
-		car->restPos.vel.y = (car->restPos.pos.y - carElt->_pos_Y) / travelTime;
-
-		carElt->_pos_X += car->restPos.vel.x * SimDeltaTime;
-		carElt->_pos_Y += car->restPos.vel.y * SimDeltaTime;
-		sgMakeCoordMat4(carElt->pub.posMat, carElt->_pos_X, carElt->_pos_Y, carElt->_pos_Z - carElt->_statGC_z,
-			RAD2DEG(carElt->_yaw), RAD2DEG(carElt->_roll), RAD2DEG(carElt->_pitch));
-
-		if ((fabs(car->restPos.pos.x - carElt->_pos_X) < 0.5) && (fabs(car->restPos.pos.y - carElt->_pos_Y) < 0.5)) {
-			carElt->_state &= ~RM_CAR_STATE_PULLSIDE;
-			carElt->_state |= RM_CAR_STATE_PULLDN;
-		}
-		return;
-	}
+//			// Moved pullside velocity computation down due to floating point error accumulation.
+//		}
+//		return;
+//	}
 
 
-	if (carElt->_state & RM_CAR_STATE_PULLDN) {
-		carElt->_pos_Z -= car->restPos.vel.z * SimDeltaTime;
-		sgMakeCoordMat4(carElt->pub.posMat, carElt->_pos_X, carElt->_pos_Y, carElt->_pos_Z - carElt->_statGC_z,
-			RAD2DEG(carElt->_yaw), RAD2DEG(carElt->_roll), RAD2DEG(carElt->_pitch));
+//	if (carElt->_state & RM_CAR_STATE_PULLSIDE) {
+//		// Recompute speed to avoid missing the parking point due to error accumulation (the pos might be
+//		// in the 0-10000 range, depending on the track and vel*dt is around 0-0.001, so basically all
+//		// but the most significant digits are lost under bad conditions, happens e.g on e-track-4).
+//		// Should not lead to a division by zero because the pullside process stops if the car is within
+//		// [0.5, 0.5]. Do not move it back.
+//		travelTime = DIST(car->restPos.pos.x, car->restPos.pos.y, carElt->_pos_X, carElt->_pos_Y) / PULL_SPD;
+//		car->restPos.vel.x = (car->restPos.pos.x - carElt->_pos_X) / travelTime;
+//		car->restPos.vel.y = (car->restPos.pos.y - carElt->_pos_Y) / travelTime;
 
-		if (carElt->_pos_Z < car->restPos.pos.z) {
-			carElt->_state &= ~RM_CAR_STATE_PULLDN;
-			carElt->_state |= RM_CAR_STATE_OUT;
-		}
-		return;
-	}
+//		carElt->_pos_X += car->restPos.vel.x * SimDeltaTime;
+//		carElt->_pos_Y += car->restPos.vel.y * SimDeltaTime;
+//		sgMakeCoordMat4(carElt->pub.posMat, carElt->_pos_X, carElt->_pos_Y, carElt->_pos_Z - carElt->_statGC_z,
+//			RAD2DEG(carElt->_yaw), RAD2DEG(carElt->_roll), RAD2DEG(carElt->_pitch));
+
+//		if ((fabs(car->restPos.pos.x - carElt->_pos_X) < 0.5) && (fabs(car->restPos.pos.y - carElt->_pos_Y) < 0.5)) {
+//			carElt->_state &= ~RM_CAR_STATE_PULLSIDE;
+//			carElt->_state |= RM_CAR_STATE_PULLDN;
+//		}
+//		return;
+//	}
 
 
-	if (carElt->_state & (RM_CAR_STATE_NO_SIMU & ~RM_CAR_STATE_PIT)) {
-		return;
-	}
+//	if (carElt->_state & RM_CAR_STATE_PULLDN) {
+//		carElt->_pos_Z -= car->restPos.vel.z * SimDeltaTime;
+//		sgMakeCoordMat4(carElt->pub.posMat, carElt->_pos_X, carElt->_pos_Y, carElt->_pos_Z - carElt->_statGC_z,
+//			RAD2DEG(carElt->_yaw), RAD2DEG(carElt->_roll), RAD2DEG(carElt->_pitch));
 
-	if (carElt->_state & RM_CAR_STATE_PIT) {
-		if ((s->_maxDammage) && (car->dammage > s->_maxDammage)) {
-			// Broken during pit stop.
-			carElt->_state &= ~RM_CAR_STATE_PIT;
-			carElt->_pit->pitCarIndex = TR_PIT_STATE_FREE;
-		} else {
-			return;
-		}
-	}
+//		if (carElt->_pos_Z < car->restPos.pos.z) {
+//			carElt->_state &= ~RM_CAR_STATE_PULLDN;
+//			carElt->_state |= RM_CAR_STATE_OUT;
+//		}
+//		return;
+//	}
 
-	if ((s->_maxDammage) && (car->dammage > s->_maxDammage)) {
-		carElt->_state |= RM_CAR_STATE_BROKEN;
-	} else {
-		carElt->_state |= RM_CAR_STATE_OUTOFGAS;
-	}
 
-	carElt->_gear = car->transmission.gearbox.gear = 0;
-	carElt->_enginerpm = car->engine.rads = 0;
+//	if (carElt->_state & (RM_CAR_STATE_NO_SIMU & ~RM_CAR_STATE_PIT)) {
+//		return;
+//	}
 
-	if (!(carElt->_state & RM_CAR_STATE_DNF)) {
-		if (fabs(carElt->_speed_x) > 1.0) {
-			return;
-		}
-	}
+//	if (carElt->_state & RM_CAR_STATE_PIT) {
+//		if ((s->_maxDammage) && (car->dammage > s->_maxDammage)) {
+//			// Broken during pit stop.
+//			carElt->_state &= ~RM_CAR_STATE_PIT;
+//			carElt->_pit->pitCarIndex = TR_PIT_STATE_FREE;
+//		} else {
+//			return;
+//		}
+//	}
 
-	carElt->_state |= RM_CAR_STATE_PULLUP;
-	// RM_CAR_STATE_NO_SIMU evaluates to > 0 from here, so we remove the car from the
-	// collision detection.
-	SimCollideRemoveCar(car, s->_ncars);
+//	if ((s->_maxDammage) && (car->dammage > s->_maxDammage)) {
+//		carElt->_state |= RM_CAR_STATE_BROKEN;
+//	} else {
+//		carElt->_state |= RM_CAR_STATE_OUTOFGAS;
+//	}
 
-	carElt->priv.collision = car->collision = 0;
-	for(i = 0; i < 4; i++) {
-		carElt->_skid[i] = 0;
-		carElt->_wheelSpinVel(i) = 0;
-		carElt->_brakeTemp(i) = 0;
-	}
+//	carElt->_gear = car->transmission.gearbox.gear = 0;
+//	carElt->_enginerpm = car->engine.rads = 0;
 
-	carElt->pub.DynGC = car->DynGC;
-	carElt->_speed_x = 0;
+//	if (!(carElt->_state & RM_CAR_STATE_DNF)) {
+//		if (fabs(carElt->_speed_x) > 1.0) {
+//			return;
+//		}
+//	}
 
-	// Compute the target zone for the wrecked car.
-	trkPos = car->trkPos;
-	if (trkPos.toRight >  trkPos.seg->width / 2.0) {
-		while (trkPos.seg->lside != 0) {
-			trkPos.seg = trkPos.seg->lside;
-		}
-		trkPos.toLeft = -3.0;
-		trkFlag = TR_TOLEFT;
-	} else {
-		while (trkPos.seg->rside != 0) {
-			trkPos.seg = trkPos.seg->rside;
-		}
-		trkPos.toRight = -3.0;
-		trkFlag = TR_TORIGHT;
-	}
+//	carElt->_state |= RM_CAR_STATE_PULLUP;
+//	// RM_CAR_STATE_NO_SIMU evaluates to > 0 from here, so we remove the car from the
+//	// collision detection.
+//	SimCollideRemoveCar(car, s->_ncars);
 
-	trkPos.type = TR_LPOS_SEGMENT;
-	RtTrackLocal2Global(&trkPos, &(car->restPos.pos.x), &(car->restPos.pos.y), trkFlag);
-	car->restPos.pos.z = RtTrackHeightL(&trkPos) + carElt->_statGC_z;
-	car->restPos.pos.az = RtTrackSideTgAngleL(&trkPos);
-	car->restPos.pos.ax = 0;
-	car->restPos.pos.ay = 0;
+//	carElt->priv.collision = car->collision = 0;
+//	for(i = 0; i < 4; i++) {
+//		carElt->_skid[i] = 0;
+//		carElt->_wheelSpinVel(i) = 0;
+//		carElt->_brakeTemp(i) = 0;
+//	}
 
-	car->restPos.vel.z = PULL_SPD;
-	travelTime = (car->restPos.pos.z + PULL_Z_OFFSET - carElt->_pos_Z) / car->restPos.vel.z;
-	dang = car->restPos.pos.az - carElt->_yaw;
-	NORM_PI_PI(dang);
-	car->restPos.vel.az = dang / travelTime;
-	dang = car->restPos.pos.ax - carElt->_roll;
-	NORM_PI_PI(dang);
-	car->restPos.vel.ax = dang / travelTime;
-	dang = car->restPos.pos.ay - carElt->_pitch;
-	NORM_PI_PI(dang);
-	car->restPos.vel.ay = dang / travelTime;
+//	carElt->pub.DynGC = car->DynGC;
+//	carElt->_speed_x = 0;
+
+//	// Compute the target zone for the wrecked car.
+//	trkPos = car->trkPos;
+//	if (trkPos.toRight >  trkPos.seg->width / 2.0) {
+//		while (trkPos.seg->lside != 0) {
+//			trkPos.seg = trkPos.seg->lside;
+//		}
+//		trkPos.toLeft = -3.0;
+//		trkFlag = TR_TOLEFT;
+//	} else {
+//		while (trkPos.seg->rside != 0) {
+//			trkPos.seg = trkPos.seg->rside;
+//		}
+//		trkPos.toRight = -3.0;
+//		trkFlag = TR_TORIGHT;
+//	}
+
+//	trkPos.type = TR_LPOS_SEGMENT;
+//	RtTrackLocal2Global(&trkPos, &(car->restPos.pos.x), &(car->restPos.pos.y), trkFlag);
+//	car->restPos.pos.z = RtTrackHeightL(&trkPos) + carElt->_statGC_z;
+//	car->restPos.pos.az = RtTrackSideTgAngleL(&trkPos);
+//	car->restPos.pos.ax = 0;
+//	car->restPos.pos.ay = 0;
+
+//	car->restPos.vel.z = PULL_SPD;
+//	travelTime = (car->restPos.pos.z + PULL_Z_OFFSET - carElt->_pos_Z) / car->restPos.vel.z;
+//	dang = car->restPos.pos.az - carElt->_yaw;
+//	NORM_PI_PI(dang);
+//	car->restPos.vel.az = dang / travelTime;
+//	dang = car->restPos.pos.ax - carElt->_roll;
+//	NORM_PI_PI(dang);
+//	car->restPos.vel.ax = dang / travelTime;
+//	dang = car->restPos.pos.ay - carElt->_pitch;
+//	NORM_PI_PI(dang);
+//	car->restPos.vel.ay = dang / travelTime;
 }
 
 

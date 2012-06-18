@@ -3,16 +3,16 @@ package scr;
 public class SimpleDriver extends Controller{
 	
 	/* Gear Changing Constants*/
-	final int[]  gearUp={5000,6000,6000,6500,7000,0};
-	final int[]  gearDown={0,2500,3000,3000,3500,3500};
+	final int[]  gearUp={7000,8500,8500,8500,8500,0};
+	final int[]  gearDown={0,3500,5000,6000,6000,6000};
 
 	/* Stuck constants*/
 	final int  stuckTime = 25;
 	final float  stuckAngle = (float) 0.523598775; //PI/6
 
 	/* Accel and Brake Constants*/
-	final float maxSpeedDist=70;
-	final float maxSpeed=150;
+	final float maxSpeedDist=100; //70
+	final float maxSpeed=400; // 150
 	final float sin5 = (float) 0.08716;
 	final float cos5 = (float) 0.99619;
 
@@ -36,6 +36,7 @@ public class SimpleDriver extends Controller{
 	final float clutchDec=(float) 0.01;
 	final float clutchMaxModifier=(float) 1.3;
 	final float clutchMaxTime=(float) 1.5;
+	final float STEERING_CONSTANT=(float) 0.7; //0.5
 	
 	private int stuck=0;
 
@@ -75,7 +76,7 @@ public class SimpleDriver extends Controller{
 	private float getSteer(SensorModel sensors){
 		// steering angle is compute by correcting the actual car angle w.r.t. to track 
 		// axis [sensors.getAngle()] and to adjust car position w.r.t to middle of track [sensors.getTrackPos()*0.5]
-	    float targetAngle=(float) (sensors.getAngleToTrackAxis()-sensors.getTrackPosition()*0.5);
+	    float targetAngle=(float) (sensors.getAngleToTrackAxis()-sensors.getTrackPosition()*STEERING_CONSTANT);
 	    // at high speed reduce the steering command to avoid loosing the control
 	    if (sensors.getSpeed() > steerSensitivityOffset)
 	        return (float) (targetAngle/(steerLock*(sensors.getSpeed()-steerSensitivityOffset)*wheelSensitivityCoeff));

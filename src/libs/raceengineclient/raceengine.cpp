@@ -194,8 +194,9 @@ ReManage(tCarElt *car)
 				sprintf(car->ctrl.msg[2], "in pits %.1fs", s->currentTime - info->startPitTime);
 			}
 		} else if ((car->ctrl.raceCmd & RM_CMD_PIT_ASKED) &&
-					car->_pit->pitCarIndex == TR_PIT_STATE_FREE &&
-				   (s->_maxDammage == 0 || car->_dammage <= s->_maxDammage))
+					car->_pit->pitCarIndex == TR_PIT_STATE_FREE )//&&
+// GIUSE - VISION HERE!! - actually it's for the evolution, removing the damage limits while still computing the damage
+//				   (s->_maxDammage == 0 || car->_dammage <= s->_maxDammage))
 		{
 			tdble lgFromStart = car->_trkPos.seg->lgfromstart;
 			switch (car->_trkPos.seg->type) {

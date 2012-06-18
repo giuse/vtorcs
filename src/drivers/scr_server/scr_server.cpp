@@ -64,7 +64,9 @@ typedef struct sockaddr_in tSockAddrIn;
 //#define UDP_LISTEN_PORT 3001
 #define UDP_ID "SCR"
 #define UDP_DEFAULT_TIMEOUT 10000
-#define UDP_MSGLEN 350000
+// GIUSE - size has to be increased to accomodate the image
+static int UDP_MSGLEN = 350000;
+//#define UDP_MSGLEN 350000
 //#define __UDP_SERVER_VERBOSE__
 /************************/
 
