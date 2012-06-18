@@ -477,9 +477,12 @@ drive(int index, tCarElt* car, tSituation *s)
 
     distRaced[index] += curDistRaced;
 
+
+
+
+
     float totdist = curTrack->length * (car->race.laps -1) + car->race.distFromStartLine;
     
-//    fprintf("totraced: %d\n",totdist);
 //    std::cerr << "totraced: " << totdist << std::endl;
 
     /**********************************************************************

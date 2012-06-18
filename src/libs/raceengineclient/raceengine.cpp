@@ -122,6 +122,7 @@ ReRaceBigMsgSet(char *msg, double life)
 static void
 visionUpdate()
 {
+//  printf("START visionUpdate\n");
     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadBuffer(GL_FRONT);
@@ -135,6 +136,7 @@ visionUpdate()
       GL_RGB /*GL_LUMINANCE?*/, GL_UNSIGNED_BYTE,
       (GLvoid*)ReInfo->vision->img
     );
+//  printf("END visionUpdate\n");
 }
 
 
@@ -654,7 +656,7 @@ ReStart(void)
 //    640 480 640 480
 
       // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
-      ReInfo->vision->imgsize = 100;//ReInfo->vision->vw * ReInfo->vision->vh *3;
+      ReInfo->vision->imgsize = 100*3;//ReInfo->vision->vw * ReInfo->vision->vh *3;
       ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize);
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
       visionUpdate(); // put first image
