@@ -519,6 +519,7 @@ drive(int index, tCarElt* car, tSituation *s)
 
     if( getVision() ){
       stateString += SimpleParser::stringify("img", car->vision->img, car->vision->imgsize);
+//      std::cout << car->vision->imgsize << std::endl;
     }
     
   // GIUSE - that's UGLY, can we stay coherent with either char* or string??

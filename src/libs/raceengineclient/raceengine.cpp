@@ -47,6 +47,8 @@ int	RESTART = 0;
 
 static void ReRaceRules(tCarElt *car);
 
+// GIUSE - VISION HERE!
+static unsigned char* tmpimg;
 
 /* Compute Pit stop time */
 static void
@@ -125,15 +127,31 @@ visionUpdate()
 //  printf("START visionUpdate\n");
     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+    // set component scales before get pixels
+    glPixelTransferf(GL_RED_SCALE, 0.299f);
+    glPixelTransferf(GL_GREEN_SCALE, 0.587f);
+    glPixelTransferf(GL_BLUE_SCALE, 0.114f);
+
     glReadBuffer(GL_FRONT);
 //    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)ReInfo.vision->img);
 // documentation: http://www.opengl.org/sdk/docs/man/xhtml/glReadPixels.xml
+
+    // read pixels as grayscale
+//    glReadBuffer(GL_BACK);
+//    glReadPixels(0, 0, windowWidth, windowHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, (GLvoid*)buffer);
+
+    // must restore scales to default values
+    glPixelTransferf(GL_RED_SCALE, 1);
+    glPixelTransferf(GL_GREEN_SCALE, 1);
+    glPixelTransferf(GL_BLUE_SCALE, 1);
+
     glReadPixels(
 //      (ReInfo->vision->sw - ReInfo->vision->vw) / 2, 
 //      (ReInfo->vision->sh - ReInfo->vision->vh) / 2, 
 //      ReInfo->vision->vw,  ReInfo->vision->vh, 
       10,10,10,10,
-      GL_RGB /*GL_LUMINANCE?*/, GL_UNSIGNED_BYTE,
+      /*GL_RGB*/ GL_LUMINANCE, GL_UNSIGNED_BYTE,
       (GLvoid*)ReInfo->vision->img
     );
 //  printf("END visionUpdate\n");
@@ -649,7 +667,7 @@ ReStart(void)
     // fill the vision structure
     if( getVision() ){
       ReInfo->vision = (tRmVisionImg*) malloc( sizeof(tRmVisionImg) );
-      
+
 //      ReInfo->vision->capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
       GfScrGetSize(&ReInfo->vision->sw, &ReInfo->vision->sh, &ReInfo->vision->vw, &ReInfo->vision->vh);
 
@@ -657,8 +675,12 @@ ReStart(void)
 //    640 480 640 480
 
       // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
-      ReInfo->vision->imgsize = 100*3;//ReInfo->vision->vw * ReInfo->vision->vh *3;
-      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize);
+      // GIUSE - for the moment I do a quick greyscale conversion in visionUpdate
+      ReInfo->vision->imgsize = 100;//ReInfo->vision->vw * ReInfo->vision->vh *3;
+      tmpimg = (unsigned char*)malloc(ReInfo->vision->imgsize*3);
+      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize*3);
+//      memset(modInfo, 0, 10*sizeof(tModInfo));
+
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
       visionUpdate(); // put first image
     }
@@ -670,6 +692,7 @@ ReStop(void)
     ReInfo->_reRunning = 0;
     if( getVision() ){
       free(ReInfo->vision->img);
+      free(tmpimg);
     }
 }
 
