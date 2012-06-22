@@ -72,7 +72,7 @@ static int usedFG = 0;
 static char	**Res = NULL;
 static int nbRes = 0;
 #else // USE_RANDR_EXT
-static char	*Res[] = {"640x480", "800x600", "1024x768", "1152x768", "1152x864", "1200x854", "1200x960", "1280x1024", "1400x900", "1600x1200", "1680x1050", "1920x1200", "320x200"};
+static char	*Res[] = {"640x480", "800x600", "1024x768", "1152x768", "1152x864", "1200x854", "1200x960", "1280x1024", "1400x900", "1600x1200", "1680x1050", "1920x1200", "320x200","256x128"};
 static const int nbRes = sizeof(Res) / sizeof(Res[0]);
 #endif // USE_RANDR_EXT
 
@@ -217,6 +217,7 @@ gfScreenInit(void)
 		Res[5] = strdup("1280x1024");
 		Res[6] = strdup("1600x1200");
 		Res[7] = strdup("320x200");
+		Res[8] = strdup("256x128");
 	}
 #endif // USE_RANDR_EXT
 }

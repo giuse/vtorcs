@@ -405,7 +405,6 @@ typedef struct RmMovieCapture
 typedef struct RmVisionImg
 {
     int	 sw, sh, vw, vh;
-//    tRmMovieCapture* capture; // just a shorthand: ReInfo->vision.capture = &(ReInfo->movieCapture); (raceengine.cpp)
     unsigned int imgsize;
     unsigned char* img;
 

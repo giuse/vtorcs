@@ -45,6 +45,10 @@ static double	bigMsgDisp;
 tRmInfo	*ReInfo = 0;
 int	RESTART = 0;
 
+// GIUSE - debug - size of the image to be sent through udp
+// Make it zero to deactivate
+int GIUSEIMGSIZE = 16;
+
 static void ReRaceRules(tCarElt *car);
 
 // GIUSE - VISION HERE!
@@ -128,7 +132,7 @@ visionUpdate()
     glPixelStorei(GL_PACK_ROW_LENGTH, 0);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-    // set component scales before get pixels
+    // set grayscale conversion scales before get pixels
     glPixelTransferf(GL_RED_SCALE, 0.299f);
     glPixelTransferf(GL_GREEN_SCALE, 0.587f);
     glPixelTransferf(GL_BLUE_SCALE, 0.114f);
@@ -137,23 +141,22 @@ visionUpdate()
 //    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)ReInfo.vision->img);
 // documentation: http://www.opengl.org/sdk/docs/man/xhtml/glReadPixels.xml
 
-    // read pixels as grayscale
-//    glReadBuffer(GL_BACK);
-//    glReadPixels(0, 0, windowWidth, windowHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, (GLvoid*)buffer);
+    glReadPixels(
+      (ReInfo->vision->sw - ReInfo->vision->vw) / 2, 
+      (ReInfo->vision->sh - ReInfo->vision->vh) / 2, 
+      ReInfo->vision->vw,  ReInfo->vision->vh, 
+//      100,100,100,100,
+      GL_LUMINANCE, GL_UNSIGNED_BYTE,
+      (GLvoid*)ReInfo->vision->img
+    );
 
-    // must restore scales to default values
+
+    // must(?) restore scales to default values
     glPixelTransferf(GL_RED_SCALE, 1);
     glPixelTransferf(GL_GREEN_SCALE, 1);
     glPixelTransferf(GL_BLUE_SCALE, 1);
 
-    glReadPixels(
-//      (ReInfo->vision->sw - ReInfo->vision->vw) / 2, 
-//      (ReInfo->vision->sh - ReInfo->vision->vh) / 2, 
-//      ReInfo->vision->vw,  ReInfo->vision->vh, 
-      10,10,10,10,
-      /*GL_RGB*/ GL_LUMINANCE, GL_UNSIGNED_BYTE,
-      (GLvoid*)ReInfo->vision->img
-    );
+
 //  printf("END visionUpdate\n");
 }
 
@@ -268,6 +271,13 @@ ReManage(tCarElt *car)
 							ReStop();
 							RmPitMenuStart(car, (void*)car, ReUpdtPitCmd);
 						}
+						// GIUSE - VISION HERE
+						else if(getVision()) 
+						{
+							ReStop();
+							RmPitMenuStart(car, (void*)car, ReUpdtPitCmd);
+						}
+
 					} else {
 						//if(getTextOnly()==false) //LUIGI - inutile?? - TODO
 						//{
@@ -321,6 +331,13 @@ ReManage(tCarElt *car)
 							info->topSpd * 3.6, info->botSpd * 3.6, car->_dammage);
 					ReResScreenAddText(buf);
 				}
+				// else	if(getVision())
+//				{
+//					sprintf(buf,"lap: %02d   time: %s  best: %s  top spd: %.2f    min spd: %.2f    damage: %d",
+//							car->_laps - 1, t1, t2,
+//							info->topSpd * 3.6, info->botSpd * 3.6, car->_dammage);
+//					ReResScreenAddText(buf);
+//				}
 				free(t1);
 				free(t2);
 				}
@@ -668,20 +685,18 @@ ReStart(void)
     if( getVision() ){
       ReInfo->vision = (tRmVisionImg*) malloc( sizeof(tRmVisionImg) );
 
-//      ReInfo->vision->capture = &(ReInfo->movieCapture); //GIUSE - JUST A SHORTHAND
       GfScrGetSize(&ReInfo->vision->sw, &ReInfo->vision->sh, &ReInfo->vision->vw, &ReInfo->vision->vh);
 
-//      printf( "sw %d - sh %d - vw %d - vh %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh);
-//    640 480 640 480
-
-      // GIUSE - luminance (greyscale) image should be sufficient - and a third of the size
-      // GIUSE - for the moment I do a quick greyscale conversion in visionUpdate
-      ReInfo->vision->imgsize = 100;//ReInfo->vision->vw * ReInfo->vision->vh *3;
-      tmpimg = (unsigned char*)malloc(ReInfo->vision->imgsize*3);
-      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize*3);
-//      memset(modInfo, 0, 10*sizeof(tModInfo));
-
+      // GIUSE - debug - fixed size to try the speed of udp
+      if( GIUSEIMGSIZE > 0 ) 
+        ReInfo->vision->sw = ReInfo->vision->sh = ReInfo->vision->vw = ReInfo->vision->vh = GIUSEIMGSIZE;
+        
+      ReInfo->vision->imgsize = ReInfo->vision->vw * ReInfo->vision->vh;
+      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize);
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
+
+      printf( "sw %d - sh %d - vw %d - vh %d - imgsize %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh, ReInfo->vision->imgsize);
+
       visionUpdate(); // put first image
     }
 }
@@ -725,54 +740,94 @@ ReUpdate(void)
 {
     double 		t;
     tRmMovieCapture	*capture;
-    if (getTextOnly()){
+    if (getTextOnly()==false)
+    {
+  		START_PROFILE("ReUpdate");
+  		ReInfo->_refreshDisplay = 0;
+		  switch (ReInfo->_displayMode) {
+		  case RM_DISP_MODE_NORMAL:
+		  t = GfTimeClock();
+
+		  START_PROFILE("ReOneStep*");
+		  while (ReInfo->_reRunning && ((t - ReInfo->_reCurTime) > RCM_MAX_DT_SIMU)) {
+			  ReOneStep(RCM_MAX_DT_SIMU);
+		  }
+		  STOP_PROFILE("ReOneStep*");
+
+		  GfuiDisplay();
+		  ReInfo->_reGraphicItf.refresh(ReInfo->s);
+		  glutPostRedisplay();	/* Callback -> reDisplay */
+		  break;
+
+		  case RM_DISP_MODE_NONE:
+		  ReOneStep(RCM_MAX_DT_SIMU);
+		  if (ReInfo->_refreshDisplay) {
+			  GfuiDisplay();
+		  }
+		  glutPostRedisplay();	/* Callback -> reDisplay */
+		  break;
+
+		  case RM_DISP_MODE_CAPTURE:
+		  capture = &(ReInfo->movieCapture);
+		  while ((ReInfo->_reCurTime - capture->lastFrame) < capture->deltaFrame) {
+			  ReOneStep(capture->deltaSimu);
+		  }
+		  capture->lastFrame = ReInfo->_reCurTime;
+
+		  GfuiDisplay();
+		  ReInfo->_reGraphicItf.refresh(ReInfo->s);
+		  reCapture();
+		  glutPostRedisplay();	/* Callback -> reDisplay */
+		  break;
+
+		  }
+		  STOP_PROFILE("ReUpdate");
+    }
+    // GIUSE - VISION HERE!!
+    else if(getVision())
+    {
+  		START_PROFILE("ReUpdate");
+//  		ReInfo->_refreshDisplay = 0;
+//		  switch (ReInfo->_displayMode) {
+		  
+//		    case RM_DISP_MODE_NORMAL:
+//		    t = GfTimeClock();
+//		    START_PROFILE("ReOneStep*");
+//		    while (ReInfo->_reRunning && ((t - ReInfo->_reCurTime) > RCM_MAX_DT_SIMU))
+//			    ReOneStep(RCM_MAX_DT_SIMU);
+//		    STOP_PROFILE("ReOneStep*");
+//		    GfuiDisplay();
+//		    ReInfo->_reGraphicItf.refresh(ReInfo->s);
+//		    glutPostRedisplay();	/* Callback -> reDisplay */
+//		    break;
+
+//		    case RM_DISP_MODE_NONE:
+		    ReOneStep(RCM_MAX_DT_SIMU);
+//		    if (ReInfo->_refreshDisplay)
+//			    GfuiDisplay();
+		    glutPostRedisplay();	/* Callback -> reDisplay */
+//		    break;
+
+//		    case RM_DISP_MODE_CAPTURE:
+//		    capture = &(ReInfo->movieCapture);
+//		    while ((ReInfo->_reCurTime - capture->lastFrame) < capture->deltaFrame) 
+//			    ReOneStep(capture->deltaSimu);
+//		    capture->lastFrame = ReInfo->_reCurTime;
+//		    GfuiDisplay();
+//		    ReInfo->_reGraphicItf.refresh(ReInfo->s);
+//		    reCapture();
+//		    glutPostRedisplay();	/* Callback -> reDisplay */
+//		    break;
+
+//		  }
+		  STOP_PROFILE("ReUpdate");
+    }
+    else // text only
+    {
     	ReOneStep(RCM_MAX_DT_SIMU);
     	START_PROFILE("ReUpdate");
     	STOP_PROFILE("ReUpdate");
-    }
-    else
-    {
-		START_PROFILE("ReUpdate");
-		ReInfo->_refreshDisplay = 0;
-		switch (ReInfo->_displayMode) {
-		case RM_DISP_MODE_NORMAL:
-		t = GfTimeClock();
-
-		START_PROFILE("ReOneStep*");
-		while (ReInfo->_reRunning && ((t - ReInfo->_reCurTime) > RCM_MAX_DT_SIMU)) {
-			ReOneStep(RCM_MAX_DT_SIMU);
-		}
-		STOP_PROFILE("ReOneStep*");
-
-		GfuiDisplay();
-		ReInfo->_reGraphicItf.refresh(ReInfo->s);
-		glutPostRedisplay();	/* Callback -> reDisplay */
-		break;
-
-		case RM_DISP_MODE_NONE:
-		ReOneStep(RCM_MAX_DT_SIMU);
-		if (ReInfo->_refreshDisplay) {
-			GfuiDisplay();
-		}
-		glutPostRedisplay();	/* Callback -> reDisplay */
-		break;
-
-		case RM_DISP_MODE_CAPTURE:
-		capture = &(ReInfo->movieCapture);
-		while ((ReInfo->_reCurTime - capture->lastFrame) < capture->deltaFrame) {
-			ReOneStep(capture->deltaSimu);
-		}
-		capture->lastFrame = ReInfo->_reCurTime;
-
-		GfuiDisplay();
-		ReInfo->_reGraphicItf.refresh(ReInfo->s);
-		reCapture();
-		glutPostRedisplay();	/* Callback -> reDisplay */
-		break;
-
-		}
-		STOP_PROFILE("ReUpdate");
-    }
+    }    
 
     return RM_ASYNC;
 }

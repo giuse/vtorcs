@@ -118,6 +118,12 @@ ReRaceEventInit(void)
 		RmLoadingScreenSetText("Loading Track 3D Description...");
 		ReInfo->_reGraphicItf.inittrack(ReInfo->track);
 	}
+	// GIUSE - VISION HERE!!
+	else if (getVision())
+	{
+//		RmLoadingScreenSetText("Loading Track 3D Description...");
+		ReInfo->_reGraphicItf.inittrack(ReInfo->track);
+	}
 	ReEventInitResults();
 
 	if (GfParmGetEltNb(params, RM_SECT_TRACKS) > 1) {
@@ -195,9 +201,8 @@ reRaceRealStart(void)
 	}
 
 	/* Blind mode or not */
-	if (getTextOnly())
-		ReInfo->_displayMode = RM_DISP_MODE_NONE;
-	else
+	// GIUSE - VISION HERE!! - or visual based ;)
+	if (getTextOnly()==false)
 	{
 		ReInfo->_displayMode = RM_DISP_MODE_NORMAL;
 		ReInfo->_reGameScreen = ReScreenInit();
@@ -216,6 +221,29 @@ reRaceRealStart(void)
 			}
 		}
 	}
+	// GIUSE - VISION HERE!!
+	else if (getVision())
+	{
+		ReInfo->_displayMode = RM_DISP_MODE_NORMAL;
+		ReInfo->_reGameScreen = ReScreenInit();
+
+//		foundHuman = 0;
+//		for (i = 0; i < s->_ncars; i++) {
+//			if (s->cars[i]->_driverType == RM_DRV_HUMAN) {
+//				foundHuman = 1;
+//				break;
+//			}
+//		}
+//		if (!foundHuman) {
+//			if (!strcmp(GfParmGetStr(params, ReInfo->_reRaceName, RM_ATTR_DISPMODE, RM_VAL_VISIBLE), RM_VAL_INVISIBLE)) {
+				ReInfo->_displayMode = RM_DISP_MODE_NONE;
+				ReInfo->_reGameScreen = ReResScreenInit();
+//			}
+//		}
+  }	else
+	{
+		ReInfo->_displayMode = RM_DISP_MODE_NONE;
+  }
 
 	if (!(ReInfo->s->_raceType == RM_TYPE_QUALIF) ||
 	((int)GfParmGetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1) == 1))
@@ -278,6 +306,19 @@ reRaceRealStart(void)
 		}
 
 		GfuiScreenActivate(ReInfo->_reGameScreen);
+	}
+  // GIUSE - VISION HERE!!
+  else if (getVision())
+	{
+		GfScrGetSize(&sw, &sh, &vw, &vh);
+		ReInfo->_reGraphicItf.initview((sw-vw)/2, (sh-vh)/2, vw, vh, GR_VIEW_STD, ReInfo->_reGameScreen);
+
+//		if (ReInfo->_displayMode == RM_DISP_MODE_NORMAL) {
+//			/* RmLoadingScreenSetText("Loading Cars 3D Objects..."); */
+			ReInfo->_reGraphicItf.initcars(s);
+//		}
+
+//		GfuiScreenActivate(ReInfo->_reGameScreen);
 	}
 
 	return RM_SYNC | RM_NEXT_STEP;
@@ -399,6 +440,12 @@ ReRaceStart(void)
 			RmShutdownLoadingScreen();
 			RmDisplayStartRace(ReInfo, StartRaceHookInit(), AbandonRaceHookInit());
 		}
+    // GIUSE - VISION HERE!!
+		if (getVision())
+		{
+//			RmShutdownLoadingScreen();
+			RmDisplayStartRace(ReInfo, StartRaceHookInit(), AbandonRaceHookInit());
+		}
 		return RM_ASYNC | RM_NEXT_STEP;
 	}
 
@@ -512,7 +559,40 @@ ReRaceEnd(void)
 	void *params = ReInfo->params;
 	void *results = ReInfo->results;
 
-	if (getTextOnly()){
+	if (getTextOnly()==false)
+	{
+		ReRaceCleanup();
+		if (ReInfo->s->_raceType == RM_TYPE_QUALIF) {
+			curDrvIdx = (int)GfParmGetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1);
+			curDrvIdx++;
+			if (curDrvIdx > GfParmGetEltNb(params, RM_SECT_DRIVERS)) {
+				GfParmSetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1);
+				return ReDisplayResults();
+			}
+			GfParmSetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, curDrvIdx);
+			return RM_SYNC | RM_NEXT_RACE;
+		}
+		return ReDisplayResults();
+	}
+	// GIUSE - VISION HERE!!
+	else if (getVision())
+	{
+		ReRaceCleanup();
+		if (ReInfo->s->_raceType == RM_TYPE_QUALIF) {
+			curDrvIdx = (int) 1 + GfParmGetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1);
+			if (curDrvIdx > GfParmGetEltNb(params, RM_SECT_DRIVERS)) {
+				GfParmSetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1);
+			}
+			else
+			{
+			  GfParmSetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, curDrvIdx);
+			  return RM_SYNC | RM_NEXT_RACE;
+			}
+		}
+		return RE_STATE_EXIT;
+	}
+	else
+	{
 		int i;
 		tRobotItf *robot;
 		int nCars;
@@ -527,21 +607,6 @@ ReRaceEnd(void)
 			free(robot);
 		}
 		return RE_STATE_EXIT;
-	}
-	else
-	{
-		ReRaceCleanup();
-		if (ReInfo->s->_raceType == RM_TYPE_QUALIF) {
-			curDrvIdx = (int)GfParmGetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1);
-			curDrvIdx++;
-			if (curDrvIdx > GfParmGetEltNb(params, RM_SECT_DRIVERS)) {
-				GfParmSetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, 1);
-				return ReDisplayResults();
-			}
-			GfParmSetNum(results, RE_SECT_CURRENT, RE_ATTR_CUR_DRIVER, NULL, curDrvIdx);
-			return RM_SYNC | RM_NEXT_RACE;
-		}
-		return ReDisplayResults();
 	}
 }
 

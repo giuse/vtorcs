@@ -70,6 +70,17 @@ ReStateManage(void)
 						ReInfo->_reState = RE_STATE_EVENT_INIT;
 					}
 				}
+				// GIUSE - VISION HERE!!
+				else if (getVision())
+				{
+//					GfOut("RaceEngine: state = RE_STATE_CONFIG\n");
+					/* Display the race specific menu */
+//					mode = 
+					ReRacemanMenu();
+//					if (mode & RM_NEXT_STEP) {
+						ReInfo->_reState = RE_STATE_EVENT_INIT;
+//					}
+				}
 				else
 				{
 					ReInfo->_reState = RE_STATE_EVENT_INIT;
@@ -133,6 +144,9 @@ ReStateManage(void)
 						ReRaceCleanup();
 						ReInfo->_reState = RE_STATE_PRE_RACE;
 						if (getTextOnly()==false)
+							GfuiScreenActivate(ReInfo->_reGameScreen);
+            // GIUSE - VISION HERE!!
+						else if (getVision())
 							GfuiScreenActivate(ReInfo->_reGameScreen);
 					}
 					else
@@ -200,6 +214,9 @@ ReStateManage(void)
 			case RE_STATE_EXIT:
 //				printf("RE_STATE_EXIT\n");
 				if (getTextOnly()==false)
+					GfScrShutdown();
+        // GIUSE - VISION HERE!!
+				else if (getVision())
 					GfScrShutdown();
 				exit (0);		/* brutal isn't it ? */
 				break;

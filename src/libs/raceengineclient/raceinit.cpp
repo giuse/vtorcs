@@ -87,7 +87,14 @@ ReInit(void)
 	GfOut("Loading Graphic Engine...\n");
 	dllname = GfParmGetStr(ReInfo->_reParam, "Modules", "graphic", "");
 	sprintf(key, "%smodules/graphic/%s.%s", GetLibDir (), dllname, DLLEXT);
+  // GIUSE - VISION HERE!! generate the framebuffer if vision is active, even in text only
 	if (getTextOnly()==false)
+	{
+		if (GfModLoad(0, key, &reEventModList)) return;
+		reEventModList->modInfo->fctInit(reEventModList->modInfo->index, &ReInfo->_reGraphicItf);
+	}
+  // GIUSE - VISION HERE!!
+	else if (getVision())
 	{
 		if (GfModLoad(0, key, &reEventModList)) return;
 		reEventModList->modInfo->fctInit(reEventModList->modInfo->index, &ReInfo->_reGraphicItf);
@@ -228,21 +235,30 @@ void ReAddRacemanListButton(void *menuHandle)
 	racemanCur = racemanList;
 	do
 	{
-		if (getTextOnly())
-		{
-			if(strcmp(racemanCur->dispName, "Quick Race") == 0)
-					{
-						printf("Starting Quick Race \n");
-						reSelectRaceman(racemanCur->userData);
-					}
-		}
-		else
+		if (getTextOnly()==false)
 		{
 			GfuiMenuButtonCreate(menuHandle,
 					racemanCur->dispName,
 					GfParmGetStr(racemanCur->userData, RM_SECT_HEADER, RM_ATTR_DESCR, ""),
 					racemanCur->userData,
 					reSelectRaceman);
+		}
+		// GIUSE - VISION HERE!!
+		else if(getVision())
+		{
+			if(strcmp(racemanCur->dispName, "Quick Race") == 0)
+			{
+//				printf("Starting Quick Race \n");
+				reSelectRaceman(racemanCur->userData);
+			}
+		}
+		else
+		{
+			if(strcmp(racemanCur->dispName, "Quick Race") == 0)
+			{
+				printf("Starting Quick Race \n");
+				reSelectRaceman(racemanCur->userData);
+			}
 		}
 		racemanCur = racemanCur->next;
 	} while (racemanCur != racemanList);

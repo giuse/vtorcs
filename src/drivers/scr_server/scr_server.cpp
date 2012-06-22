@@ -60,13 +60,15 @@ typedef struct sockaddr_in tSockAddrIn;
 #endif
 
 /*** defines for UDP *****/
-// GIUSE - port is now provided from command line (torcs -p 3001)
+// GIUSE - port is now provided from command line (e.g. torcs -p 3001)
 //#define UDP_LISTEN_PORT 3001
-#define UDP_ID "SCR"
-#define UDP_DEFAULT_TIMEOUT 10000
-// GIUSE - size has to be increased to accomodate the image
-static int UDP_MSGLEN = 350000;
-//#define UDP_MSGLEN 350000
+#define UDP_ID "SCR-VIS"
+// GIUSE - for evolution we load the server over the limit - we need higher timeouts!
+//#define UDP_DEFAULT_TIMEOUT 10000
+#define UDP_DEFAULT_TIMEOUT 100000
+// GIUSE - size has to be increased to accomodate larger images
+static int UDP_MSGLEN = 32*32+1000;
+//#define UDP_MSGLEN 650000
 //#define __UDP_SERVER_VERBOSE__
 /************************/
 
@@ -521,6 +523,10 @@ drive(int index, tCarElt* car, tSituation *s)
       stateString += SimpleParser::stringify("img", car->vision->img, car->vision->imgsize);
 //      std::cout << car->vision->imgsize << std::endl;
     }
+    
+//    for(int i=0; i < car->vision->imgsize; i++){
+//      std::cout << (int)car->vision->img[i] << " ";
+//    }
     
   // GIUSE - that's UGLY, can we stay coherent with either char* or string??
 //    char line[UDP_MSGLEN];
