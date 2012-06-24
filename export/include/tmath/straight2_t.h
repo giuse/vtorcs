@@ -1,1 +1,1 @@
-/home/giuse/torcs-visual-server/src/libs/math/straight2_t.h
+/home/koutnij/work/git/torcs-visual-server/src/libs/math/straight2_t.h
