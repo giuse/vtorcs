@@ -1,1 +1,0 @@
-/home/koutnij/git/torcs-visual-server/src/linux/osspec.h
