@@ -47,7 +47,7 @@ int	RESTART = 0;
 
 // GIUSE - debug - size of the image to be sent through udp
 // Make it zero to deactivate
-int GIUSEIMGSIZE = 16;
+int GIUSEIMGSIZE = 32;
 
 static void ReRaceRules(tCarElt *car);
 
@@ -123,6 +123,10 @@ ReRaceBigMsgSet(char *msg, double life)
 	bigMsgDisp = ReInfo->_reCurTime + life;
 }
 
+static unsigned char* tmprgbimg = (unsigned char*)malloc(3*GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(unsigned char));
+static double* tmpavgimg = (double*)malloc(GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(double));
+static double* rgbscales = (double*)malloc(3*sizeof(double));
+
 
 // GIUSE - VISION HERE!!!
 static void
@@ -133,9 +137,9 @@ visionUpdate()
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
     // set grayscale conversion scales before get pixels
-    glPixelTransferf(GL_RED_SCALE, 0.299f);
-    glPixelTransferf(GL_GREEN_SCALE, 0.587f);
-    glPixelTransferf(GL_BLUE_SCALE, 0.114f);
+//    glPixelTransferf(GL_RED_SCALE, 0.299f);
+//    glPixelTransferf(GL_GREEN_SCALE, 0.587f);
+//    glPixelTransferf(GL_BLUE_SCALE, 0.114f);
 
     glReadBuffer(GL_FRONT);
 //    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)ReInfo.vision->img);
@@ -146,15 +150,31 @@ visionUpdate()
       (ReInfo->vision->sh - ReInfo->vision->vh) / 2, 
       ReInfo->vision->vw,  ReInfo->vision->vh, 
 //      100,100,100,100,
-      GL_LUMINANCE, GL_UNSIGNED_BYTE,
-      (GLvoid*)ReInfo->vision->img
+//      GL_LUMINANCE, GL_UNSIGNED_BYTE,
+      GL_RGB, GL_UNSIGNED_BYTE,
+      (GLvoid*)tmprgbimg
+//      (GLvoid*)ReInfo->vision->img
     );
+
+rgbscales[0]=0.299;
+rgbscales[1]=0.587;
+rgbscales[2]=0.114;
+
+for (int i=0; i<GIUSEIMGSIZE*GIUSEIMGSIZE; i++)
+{
+	tmpavgimg[i] = 0;
+	for (int j=0; j<3; j++)
+	{
+		tmpavgimg[i] += rgbscales[j] * tmprgbimg[i+j];
+	}
+	tmpavgimg[i] /= 3;
+}
 
 
     // must(?) restore scales to default values
-    glPixelTransferf(GL_RED_SCALE, 1);
-    glPixelTransferf(GL_GREEN_SCALE, 1);
-    glPixelTransferf(GL_BLUE_SCALE, 1);
+//    glPixelTransferf(GL_RED_SCALE, 1);
+//    glPixelTransferf(GL_GREEN_SCALE, 1);
+//    glPixelTransferf(GL_BLUE_SCALE, 1);
 
 
 //  printf("END visionUpdate\n");
@@ -696,6 +716,9 @@ ReStart(void)
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
 
       printf( "sw %d - sh %d - vw %d - vh %d - imgsize %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh, ReInfo->vision->imgsize);
+
+     //GIUSE: accelerate the execution speed with a lower-than one positive constant here
+     ReInfo->_reTimeMult = 0.5;
 
       visionUpdate(); // put first image
     }

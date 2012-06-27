@@ -1,1 +1,1 @@
-/home/koutnij/work/git/torcs-visual-server/src/libs/confscreens/simuconfig.h
+/home/koutnij/torcs-visual-server/src/libs/confscreens/simuconfig.h

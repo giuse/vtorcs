@@ -1,1 +1,1 @@
-/home/koutnij/work/git/torcs-visual-server/src/libs/tgfclient/screen_properties.h
+/home/koutnij/torcs-visual-server/src/libs/tgfclient/screen_properties.h
