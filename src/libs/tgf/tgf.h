@@ -652,8 +652,8 @@ extern void setVision(bool vis);
 extern int getVision();
 
 // GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
-extern void setSpeed(double speedMult);
-extern double getSpeed();
+extern void setSpeedMult(double speedMult);
+extern double getSpeedMult();
 
 
 #endif /* __TGF__H__ */

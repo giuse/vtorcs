@@ -83,11 +83,11 @@ int getVision()
 }
 
 // GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
-void setSpeed(double speedMult)
+void setSpeedMult(double speedMult)
 {
   __SPEEDMULT__ = speedMult;
 }
-double getSpeed()
+double getSpeedMult()
 {
   return __SPEEDMULT__;
 }

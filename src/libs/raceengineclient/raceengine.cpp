@@ -657,10 +657,9 @@ ReOneStep(double deltaTimeIncrement)
 
 //	printf ("ReOneStep\n");
 
-// GIUSE - let's skip the ready-set-go if we're already trying to go faster than realtime
-if(s->currentTime<0 && getSpeed()<1) s->currentTime = 0.0;
-
-
+  // GIUSE - let's skip the ready-set-go if we're already trying to go faster than realtime
+  if(s->currentTime<0 && getSpeedMult()<1) s->currentTime = 0.0;
+/*
 	if (getTextOnly() == false)
 	{
 		if (floor(s->currentTime) == -2.0) {
@@ -671,9 +670,10 @@ if(s->currentTime<0 && getSpeed()<1) s->currentTime = 0.0;
 			ReRaceBigMsgSet("Go", 1.0);
 		}
 	}
+*/
 
   // GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
-	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult * getSpeed();
+	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult * getSpeedMult();
 //	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult; /* "Real" time */
 	s->currentTime += deltaTimeIncrement; /* Simulated time */
 
