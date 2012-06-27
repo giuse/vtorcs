@@ -47,7 +47,7 @@ int	RESTART = 0;
 
 // GIUSE - debug - size of the image to be sent through udp
 // Make it zero to deactivate
-int GIUSEIMGSIZE = 32;
+int GIUSEIMGSIZE = 64;
 
 static void ReRaceRules(tCarElt *car);
 
@@ -176,7 +176,7 @@ for (int pixel=0; pixel<GIUSEIMGSIZE*GIUSEIMGSIZE; pixel++)
 		avg += RGBscales[channel] * tmpRGBimg[3*pixel+channel];
 	}
 	// GIUSE - CHECK if this cast is sufficient to round the average
-	ReInfo->vision->img[pixel] = (unsigned char) avg/3;
+	ReInfo->vision->img[pixel] = (unsigned char) avg;
 }
 
 

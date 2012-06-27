@@ -1,1 +1,1 @@
-/home/giuse/torcs-visual-server/src/libs/confscreens/openglconfig.h
+/home/koutnij/git/torcs-visual-server/src/libs/confscreens/openglconfig.h

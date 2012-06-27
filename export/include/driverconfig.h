@@ -1,1 +1,1 @@
-/home/giuse/torcs-visual-server/src/libs/confscreens/driverconfig.h
+/home/koutnij/git/torcs-visual-server/src/libs/confscreens/driverconfig.h
