@@ -37,7 +37,15 @@ init_args(int argc, char **argv)
     setVersion("2010");
 
     i = 1;
+
+    for( int asdf = 0; asdf<argc; asdf++)
+      printf("arg %d: %s\n",asdf,argv[asdf]);
+
+    printf("\n");
+
+
     while (i < argc) {
+    printf("arg %d: %s\n",i,argv[i]);
 	if (strncmp(argv[i], "-l", 2) == 0) {
 	    i++;
 	    if (i < argc) {
@@ -111,10 +119,16 @@ init_args(int argc, char **argv)
         i++;
 		    printf("UDP Listen Port set to %d!\n", getUDPListenPort()); 
   // GIUSE - VISION HERE! ACTIVATE IMAGE GENERATION (and send them to clients if specified in the car/server)
-	} else if (strncmp(argv[i], "-vision", 4) == 0) {
+	} else if (strncmp(argv[i], "-vision", 7) == 0) {
 		    i++;
 		    setVision(true);
-		    printf("Image generation is ON!\n"); 
+		    printf("Image generation is FUCKING ON!\n"); 
+  // GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
+	} else if (strncmp(argv[i], "-a", 2) == 0) {
+		    i++;
+		    printf("Speed set to %dx realtime!\n", atoi(argv[i])); 
+		    setSpeed((double) (1.0 / (double) atoi(argv[i])));
+        i++;
 		     
 #ifndef FREEGLUT
 	} else if (strncmp(argv[i], "-m", 2) == 0) {

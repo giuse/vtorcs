@@ -40,6 +40,9 @@ static bool __NOISY__;
 static int __UDP_LISTEN_PORT__ = 3101;
 // GIUSE - ACTIVATE VISION (default: no)
 static bool __VISION__ = false;
+// GIUSE - SPEEDUP COMPUTATION (default: realtime - faster with positive numbers below one)
+static double __SPEEDMULT__ = 1.0;
+
 
 void setTextOnly(bool value)
 {
@@ -77,6 +80,16 @@ void setVision(bool vis)
 int getVision()
 {
   return __VISION__;
+}
+
+// GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
+void setSpeed(double speedMult)
+{
+  __SPEEDMULT__ = speedMult;
+}
+double getSpeed()
+{
+  return __SPEEDMULT__;
 }
 
 

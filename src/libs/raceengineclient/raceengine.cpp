@@ -123,9 +123,11 @@ ReRaceBigMsgSet(char *msg, double life)
 	bigMsgDisp = ReInfo->_reCurTime + life;
 }
 
-static unsigned char* tmprgbimg = (unsigned char*)malloc(3*GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(unsigned char));
-static double* tmpavgimg = (double*)malloc(GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(double));
-static double* rgbscales = (double*)malloc(3*sizeof(double));
+
+// GIUSE - TODO: quick hack, find them a place!
+static unsigned char* tmpRGBimg = (unsigned char*)malloc(3*GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(unsigned char));
+//static double* tmpavgimg = (double*)malloc(GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(double));
+static double* RGBscales = (double*)malloc(3*sizeof(double));
 
 
 // GIUSE - VISION HERE!!!
@@ -145,6 +147,8 @@ visionUpdate()
 //    glReadPixels((sw-vw)/2, (sh-vh)/2, vw, vh, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)ReInfo.vision->img);
 // documentation: http://www.opengl.org/sdk/docs/man/xhtml/glReadPixels.xml
 
+// GIUSE - there's a bug in using glPixelTransferf and GL_LUMINANCE, it gets SLOOOOOW...
+// switching to doing it by hand from rgb image (which seems quite fast)
     glReadPixels(
       (ReInfo->vision->sw - ReInfo->vision->vw) / 2, 
       (ReInfo->vision->sh - ReInfo->vision->vh) / 2, 
@@ -152,22 +156,27 @@ visionUpdate()
 //      100,100,100,100,
 //      GL_LUMINANCE, GL_UNSIGNED_BYTE,
       GL_RGB, GL_UNSIGNED_BYTE,
-      (GLvoid*)tmprgbimg
+      (GLvoid*)tmpRGBimg
 //      (GLvoid*)ReInfo->vision->img
     );
 
-rgbscales[0]=0.299;
-rgbscales[1]=0.587;
-rgbscales[2]=0.114;
 
-for (int i=0; i<GIUSEIMGSIZE*GIUSEIMGSIZE; i++)
+// GIUSE - TODO: that was only a quick hack, bring them out of here!!
+RGBscales[0]=0.299;
+RGBscales[1]=0.587;
+RGBscales[2]=0.114;
+
+double avg;
+
+for (int pixel=0; pixel<GIUSEIMGSIZE*GIUSEIMGSIZE; pixel++)
 {
-	tmpavgimg[i] = 0;
-	for (int j=0; j<3; j++)
+	avg = 0;
+	for (int channel=0; channel<3; channel++)
 	{
-		tmpavgimg[i] += rgbscales[j] * tmprgbimg[i+j];
+		avg += RGBscales[channel] * tmpRGBimg[3*pixel+channel];
 	}
-	tmpavgimg[i] /= 3;
+	// GIUSE - CHECK if this cast is sufficient to round the average
+	ReInfo->vision->img[pixel] = (unsigned char) avg/3;
 }
 
 
@@ -648,6 +657,10 @@ ReOneStep(double deltaTimeIncrement)
 
 //	printf ("ReOneStep\n");
 
+// GIUSE - let's skip the ready-set-go if we're already trying to go faster than realtime
+if(s->currentTime<0 && getSpeed()<1) s->currentTime = 0.0;
+
+
 	if (getTextOnly() == false)
 	{
 		if (floor(s->currentTime) == -2.0) {
@@ -659,7 +672,9 @@ ReOneStep(double deltaTimeIncrement)
 		}
 	}
 
-	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult; /* "Real" time */
+  // GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
+	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult * getSpeed();
+//	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult; /* "Real" time */
 	s->currentTime += deltaTimeIncrement; /* Simulated time */
 
 	if (s->currentTime < 0) {
@@ -718,7 +733,8 @@ ReStart(void)
       printf( "sw %d - sh %d - vw %d - vh %d - imgsize %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh, ReInfo->vision->imgsize);
 
      //GIUSE: accelerate the execution speed with a lower-than one positive constant here
-     ReInfo->_reTimeMult = 0.5;
+     // GIUSE - switched to command line argument
+//     ReInfo->_reTimeMult = 0.5;
 
       visionUpdate(); // put first image
     }

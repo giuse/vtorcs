@@ -1,1 +1,1 @@
-/home/koutnij/torcs-visual-server/src/libs/confscreens/confscreens.h
+/home/giuse/torcs-visual-server/src/libs/confscreens/confscreens.h

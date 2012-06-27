@@ -651,6 +651,10 @@ extern int getUDPListenPort();
 extern void setVision(bool vis);
 extern int getVision();
 
+// GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
+extern void setSpeed(double speedMult);
+extern double getSpeed();
+
 
 #endif /* __TGF__H__ */
 

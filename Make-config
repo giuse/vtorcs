@@ -22,7 +22,7 @@ SHELL = /bin/bash
 srcdir = .
 top_srcdir = ${TORCS_BASE}
 
-prefix = /home/koutnij/git/torcs-visual-server/BUILD
+prefix = /home/giuse/torcs-visual-server/BUILD
 exec_prefix = ${prefix}
 
 bindir = ${exec_prefix}/bin
