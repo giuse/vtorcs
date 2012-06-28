@@ -125,9 +125,8 @@ ReRaceBigMsgSet(char *msg, double life)
 
 
 // GIUSE - TODO: quick hack, find them a place!
-static unsigned char* tmpRGBimg = (unsigned char*)malloc(3*GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(unsigned char));
-//static double* tmpavgimg = (double*)malloc(GIUSEIMGSIZE*GIUSEIMGSIZE*sizeof(double));
-static double* RGBscales = (double*)malloc(3*sizeof(double));
+static unsigned char* tmpRGBimg = (unsigned char*)malloc( 3 * GIUSEIMGSIZE * GIUSEIMGSIZE * sizeof(unsigned char) );
+static double* RGBscales = (double*)malloc( 3 * sizeof(double) );
 
 
 // GIUSE - VISION HERE!!!
@@ -139,6 +138,7 @@ visionUpdate()
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
     // set grayscale conversion scales before get pixels
+    // GIUSE - BUG!! IT'S SO INCREDIBLY SLOOOOOW!
 //    glPixelTransferf(GL_RED_SCALE, 0.299f);
 //    glPixelTransferf(GL_GREEN_SCALE, 0.587f);
 //    glPixelTransferf(GL_BLUE_SCALE, 0.114f);
@@ -161,23 +161,21 @@ visionUpdate()
     );
 
 
-// GIUSE - TODO: that was only a quick hack, bring them out of here!!
-RGBscales[0]=0.299;
-RGBscales[1]=0.587;
-RGBscales[2]=0.114;
+    // GIUSE - TODO: that was only a quick hack, bring them out of here!!
+    RGBscales[0]=0.299;
+    RGBscales[1]=0.587;
+    RGBscales[2]=0.114;
 
-double avg;
+    double avg;
+    for (int pixel=0; pixel < GIUSEIMGSIZE*GIUSEIMGSIZE; pixel++)
+    {
+	    for (int channel=0, avg=0; channel<3; channel++)
+	    {
+		    avg += RGBscales[channel] * tmpRGBimg[3*pixel+channel];
+	    }
 
-for (int pixel=0; pixel<GIUSEIMGSIZE*GIUSEIMGSIZE; pixel++)
-{
-	avg = 0;
-	for (int channel=0; channel<3; channel++)
-	{
-		avg += RGBscales[channel] * tmpRGBimg[3*pixel+channel];
-	}
-	// GIUSE - CHECK if this cast is sufficient to round the average
-	ReInfo->vision->img[pixel] = (unsigned char) avg;
-}
+	    ReInfo->vision->img[pixel] = (unsigned char) avg;
+    }
 
 
     // must(?) restore scales to default values
@@ -185,8 +183,6 @@ for (int pixel=0; pixel<GIUSEIMGSIZE*GIUSEIMGSIZE; pixel++)
 //    glPixelTransferf(GL_GREEN_SCALE, 1);
 //    glPixelTransferf(GL_BLUE_SCALE, 1);
 
-
-//  printf("END visionUpdate\n");
 }
 
 
@@ -657,9 +653,14 @@ ReOneStep(double deltaTimeIncrement)
 
 //	printf ("ReOneStep\n");
 
-  // GIUSE - let's skip the ready-set-go if we're already trying to go faster than realtime
-  if(s->currentTime<0 /*&& getSpeedMult()<1*/) s->currentTime = 0.0;
-/*
+
+/* GIUSE - skip the message and start the race immediately
+
+    if (ReInfo->s->currentTime < -1.0) {
+	ReInfo->s->currentTime = -1.0;
+	ReInfo->_reLastTime = -1.0;
+	
+	
 	if (getTextOnly() == false)
 	{
 		if (floor(s->currentTime) == -2.0) {
@@ -673,11 +674,13 @@ ReOneStep(double deltaTimeIncrement)
 */
 
   // GIUSE - FASTER THEN RUNTIME ACTIVATION FOR NON-TEXTUAL COMPUTATION
-	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult /** getSpeedMult()*/;
+	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult * getSpeedMult();
 //	ReInfo->_reCurTime += deltaTimeIncrement * ReInfo->_reTimeMult; /* "Real" time */
 	s->currentTime += deltaTimeIncrement; /* Simulated time */
 
-	if (s->currentTime < 0) {
+// GIUSE
+//	if (s->currentTime < 0) {
+	if (s->currentTime <= 0) {
 		/* no simu yet */
 		ReInfo->s->_raceState = RM_RACE_PRESTART;
 	} else if (ReInfo->s->_raceState == RM_RACE_PRESTART) {
@@ -722,19 +725,15 @@ ReStart(void)
 
       GfScrGetSize(&ReInfo->vision->sw, &ReInfo->vision->sh, &ReInfo->vision->vw, &ReInfo->vision->vh);
 
-      // GIUSE - debug - fixed size to try the speed of udp
+      // GIUSE - debug - fixed image size to try the speed of udp
       if( GIUSEIMGSIZE > 0 ) 
         ReInfo->vision->sw = ReInfo->vision->sh = ReInfo->vision->vw = ReInfo->vision->vh = GIUSEIMGSIZE;
-        
+    
       ReInfo->vision->imgsize = ReInfo->vision->vw * ReInfo->vision->vh;
       ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize);
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
 
       printf( "sw %d - sh %d - vw %d - vh %d - imgsize %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh, ReInfo->vision->imgsize);
-
-     //GIUSE: accelerate the execution speed with a lower-than one positive constant here
-     // GIUSE - switched to command line argument
-//     ReInfo->_reTimeMult = 0.5;
 
       visionUpdate(); // put first image
     }

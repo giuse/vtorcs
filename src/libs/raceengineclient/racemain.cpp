@@ -289,8 +289,11 @@ reRaceRealStart(void)
 		RmLoadingScreenSetText("Ready.");
 
 	ReInfo->_reTimeMult = 1.0;
-	ReInfo->_reLastTime = -1.0;
-	ReInfo->s->currentTime = -2.0;
+//	ReInfo->_reLastTime = -1.0;
+//	ReInfo->s->currentTime = -2.0;
+// GIUSE - let's start immediately, to save time for evolution
+	ReInfo->_reLastTime = 0.0;
+	ReInfo->s->currentTime = 0.0;
 	ReInfo->s->deltaTime = RCM_MAX_DT_SIMU;
 
 	ReInfo->s->_raceState = RM_RACE_STARTING;

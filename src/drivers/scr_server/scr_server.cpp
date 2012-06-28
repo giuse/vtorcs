@@ -63,7 +63,7 @@ typedef struct sockaddr_in tSockAddrIn;
 // GIUSE - port is now provided from command line (e.g. torcs -p 3001)
 //#define UDP_LISTEN_PORT 3001
 #define UDP_ID "SCR-VIS"
-// GIUSE - for evolution we load the server over the limit - we need higher timeouts!
+// GIUSE - for evolution we load the server over the limits - we need higher timeouts!
 //#define UDP_DEFAULT_TIMEOUT 10000
 #define UDP_DEFAULT_TIMEOUT 100000
 // GIUSE - size has to be increased to accomodate larger images
@@ -520,8 +520,8 @@ drive(int index, tCarElt* car, tSituation *s)
 //    printf("size: %d\n",car->vision->imgsize);
 
     if( getVision() ){
-      stateString += SimpleParser::stringify("img", car->vision->img, car->vision->imgsize);
 //      std::cout << car->vision->imgsize << std::endl;
+      stateString += SimpleParser::stringify("img", car->vision->img, car->vision->imgsize);
     }
     
 //    for(int i=0; i < car->vision->imgsize; i++){
