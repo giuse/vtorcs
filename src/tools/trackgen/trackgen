@@ -18,7 +18,7 @@
 #
 ##############################################################################
 
-prefix=/home/giuse/torcs-visual-server/BUILD
+prefix=/home/koutnij/git/torcs-visual-server/BUILD
 exec_prefix=${prefix}
 
 BINDIR=${exec_prefix}/bin

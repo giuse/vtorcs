@@ -50,38 +50,8 @@
     <attnum name="focused idx" val="0"/>
     <attstr name="focused module" val="scr_server"/>
     <section name="1">
-      <attnum name="idx" val="3"/>
-      <attstr name="module" val="tita"/>
-    </section>
-
-    <section name="2">
-      <attnum name="idx" val="3"/>
-      <attstr name="module" val="inferno"/>
-    </section>
-
-    <section name="3">
-      <attnum name="idx" val="3"/>
-      <attstr name="module" val="berniw"/>
-    </section>
-
-    <section name="4">
       <attnum name="idx" val="0"/>
       <attstr name="module" val="scr_server"/>
-    </section>
-
-    <section name="5">
-      <attnum name="idx" val="2"/>
-      <attstr name="module" val="bt"/>
-    </section>
-
-    <section name="6">
-      <attnum name="idx" val="3"/>
-      <attstr name="module" val="lliaw"/>
-    </section>
-
-    <section name="7">
-      <attnum name="idx" val="2"/>
-      <attstr name="module" val="olethros"/>
     </section>
 
   </section>

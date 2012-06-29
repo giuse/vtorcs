@@ -730,8 +730,13 @@ ReStart(void)
         ReInfo->vision->sw = ReInfo->vision->sh = ReInfo->vision->vw = ReInfo->vision->vh = GIUSEIMGSIZE;
     
       ReInfo->vision->imgsize = ReInfo->vision->vw * ReInfo->vision->vh;
-      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize);
+      ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize * sizeof(unsigned char));
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
+
+      // GIUSE - let's avoid zero-images if sent before grabbing the next frame
+      memset(ReInfo->vision->img, 1, ReInfo->vision->imgsize * sizeof(unsigned char));
+      memset(tmpRGBimg, 1, 3 * GIUSEIMGSIZE * GIUSEIMGSIZE * sizeof(unsigned char));
+      memset(RGBscales, 1, 3 * sizeof(double));
 
       printf( "sw %d - sh %d - vw %d - vh %d - imgsize %d\n", ReInfo->vision->sw, ReInfo->vision->sh, ReInfo->vision->vw, ReInfo->vision->vh, ReInfo->vision->imgsize);
 
