@@ -38,6 +38,8 @@
 
 #include "raceengine.h"
 
+#include <math.h>
+
 static char	buf[1024];
 static double	msgDisp;
 static double	bigMsgDisp;
@@ -162,7 +164,7 @@ visionUpdate()
 
 
     // GIUSE - TODO: that was only a quick hack, bring them out of here!!
-    RGBscales[0]=0.299;
+/*    RGBscales[0]=0.299;
     RGBscales[1]=0.587;
     RGBscales[2]=0.114;
 
@@ -176,7 +178,24 @@ visionUpdate()
 
 	    ReInfo->vision->img[pixel] = (unsigned char) avg;
     }
-
+*/
+    // JAN: a hack of a hack: RGB -> HSB (using just the S value)
+    double avg,r,g,b,min,max,s,delta;
+    for (int pixel=0; pixel < GIUSEIMGSIZE*GIUSEIMGSIZE; pixel++)
+    {
+	r = tmpRGBimg[3*pixel];
+	g = tmpRGBimg[3*pixel+1];
+	b = tmpRGBimg[3*pixel+2];
+	min = fmin(fmin(r,g),b);
+	max = fmax(fmax(r,g),b);
+	delta = max - min;
+	if(max != 0){
+	    s = delta / max;
+	}else{
+	    s = 0;
+	}
+        ReInfo->vision->img[pixel] = (unsigned char) (255.0*s);
+    }
 
     // must(?) restore scales to default values
 //    glPixelTransferf(GL_RED_SCALE, 1);
