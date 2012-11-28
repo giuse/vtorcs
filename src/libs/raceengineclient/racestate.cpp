@@ -142,6 +142,11 @@ ReStateManage(void)
 					{
 						RESTART=0;
 						ReRaceCleanup();
+						
+						// INSERT MISSING CLEANUP HERE
+						// find by difference between end of race and here
+						// FIRST though check whether it DOES something at the end of the race
+						
 						ReInfo->_reState = RE_STATE_PRE_RACE;
 						if (getTextOnly()==false)
 							GfuiScreenActivate(ReInfo->_reGameScreen);

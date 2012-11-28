@@ -69,8 +69,15 @@ ReInit(void)
 
 	ReShutdown();
 
+		// GIUSE - free for all! trying to limit the memory leaks...
+		free(ReInfo);
+
 	ReInfo = (tRmInfo *)calloc(1, sizeof(tRmInfo));
-	ReInfo->s = (tSituation *)calloc(1, sizeof(tSituation));
+			
+		// GIUSE - free for all! trying to limit the memory leaks...
+		free(ReInfo->s);
+		
+ReInfo->s = (tSituation *)calloc(1, sizeof(tSituation));
 	ReInfo->modList = &ReRaceModList;
 
 	char buf[1024];
@@ -520,8 +527,21 @@ ReInitCars(void)
 	nCars = GfParmGetEltNb(params, RM_SECT_DRIVERS_RACING);
 	GfOut("loading %d cars\n", nCars);
 
+
+
+
+
+
+  // GIUSE - here we should do a complete deallocation of the cars
+  
+  
+  
+  
+  
+
 	FREEZ(ReInfo->carList);
 	ReInfo->carList = (tCarElt*)calloc(nCars, sizeof(tCarElt));
+
 	FREEZ(ReInfo->rules);
 	ReInfo->rules = (tRmCarRules*)calloc(nCars, sizeof(tRmCarRules));
 	focused = GfParmGetStr(ReInfo->params, RM_SECT_DRIVERS, RM_ATTR_FOCUSED, "");
@@ -548,6 +568,11 @@ ReInitCars(void)
 				curModInfo = &((*(ReInfo->modList))->modInfo[j]);
 				GfOut("Driver's name: %s\n", curModInfo->name);
 				/* retrieve the robot interface (function pointers) */
+		
+		// GIUSE - free for all! trying to limit the memory leaks...
+		//free(curRobot);
+		// GIUSE - WHY CAN'T I FREE IT?? it's being reallocated just down here!!! but running the free yields segfaults!  
+		
 				curRobot = (tRobotItf*)calloc(1, sizeof(tRobotItf));
 				curModInfo->fctInit(robotIdx, (void*)(curRobot));
 				sprintf(buf, "%sdrivers/%s/%s.xml", GetLocalDir(), cardllname, cardllname);
@@ -821,6 +846,11 @@ ReRaceCleanDrivers(void)
 		}
 		GfParmReleaseHandle(ReInfo->s->cars[i]->_paramsHandle);
 		free(robot);
+    
+    // GIUSE - freez or FREEZ is just a longhand for free.		
+    // GIUSE - check out FR33Z, it's even cooler
+		//free(ReInfo->s->cars[i]);
+
 	}
 
 	FREEZ(ReInfo->s->cars);
