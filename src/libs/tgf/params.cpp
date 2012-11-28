@@ -149,6 +149,17 @@ static struct section *getParent (struct parmHeader *conf, const char *sectionNa
 static void cleanUnusedSection (struct parmHeader *conf, struct section *section);
 
 
+// GIUSE - let's free the struct param* properly when needed
+static void freeparam(struct param* param){
+  if( param ){
+    freez (param->name);
+    freez (param->fullName);
+    freez (param->value);
+    freez (param->unit);
+    freez (param);
+  }
+}
+
 /** Configuration initialization.
     @ingroup	conf
     @return	none.
@@ -284,11 +295,8 @@ removeParam (struct parmHeader *conf, struct section *section, struct param *par
 		free(within);
 	}
 
-	freez (param->name);
-    freez (param->fullName);
-    freez (param->value);
-	freez (param->unit);
-    freez (param);
+	// GIUSE - free for all! trying to limit the memory leaks...
+  freeparam(param);
 }
 
 /* Add a parameter anywhere, does not check for duplicate. */
@@ -732,6 +740,7 @@ static void xmlStartElement (void *userData , const char *name, const char **att
 			max = val;
 		}
 
+  // GIUSE - this is the first call, no need to free
 		curParam = addParam (conf, parmHandle->curSection, shortName, val);
 		if (!curParam) {
 			GfError ("xmlStartElement: addParam failed\n");
@@ -790,6 +799,10 @@ static void xmlStartElement (void *userData , const char *name, const char **att
 			GfError ("xmlStartElement: Syntax error, missing \"val\" field in %s definition\n", name);
 			goto bailout;
 		}
+		
+		// GIUSE - free for all! trying to limit the memory leaks...
+    // this is the second call
+		freeparam(curParam);
 
 		curParam = addParam (conf, parmHandle->curSection, shortName, val);
 		if (!curParam) {
@@ -1961,7 +1974,12 @@ GfParmGetStr (void *parmHandle, const char *path, const char *key, char *deflt)
 		return deflt;
 	}
 
+// GIUSE - in order to free param, we need to duplicate the string value
 	val = param->value;
+//	val = strdup(param->value);
+//	freeparam(param);
+// GIUSE - core dumped - FIX THIS, there still is the leak!
+// this stuff ought to be tracked somewhere and deallocated at the end of the run (restart)
 
 	return val;
 }
@@ -2443,6 +2461,7 @@ insertParamMerge (struct parmHandle *parmHandle, char *path, struct param *param
 	    str = paramRef->value;
 	}
 	paramNew->value = strdup (str);
+	
     }
 }
 

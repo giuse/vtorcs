@@ -13,3 +13,11 @@ src/linux/torcs
 src/tools/package/specfiles/
 autom4te.cache/
 autoscan.log
+Make-config
+aclocal.m4
+config.h.in~
+configure
+massif-out
+config.h
+config.h.in
+
