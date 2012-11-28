@@ -10,3 +10,6 @@ gennmtab
 config.log
 config.status
 src/linux/torcs
+src/tools/package/specfiles/
+autom4te.cache/
+autoscan.log
