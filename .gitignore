@@ -1,0 +1,9 @@
+*.o
+*.so
+*.depend
+*.class
+a.out
+BUILD
+*.a
+*-bin
+gennmtab
