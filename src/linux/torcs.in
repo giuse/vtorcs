@@ -71,6 +71,23 @@ EOF
 	    echo "r -l $LOCAL_CONF -L $LIBDIR -D $DATADIR $*"
 	    ;;
 
+  # GIUSE - valgrind profiling option
+  # sorry for -v option, but there was no print version call, and -p (for "profiling") was already taken (for "port")
+	-v) shift
+      echo -e "\t PROFILING WITH VALGRIND\n"
+      VALGRIND="valgrind"
+      VALGRINDOPTS='--leak-check=full' #'--leak-check=full'
+      $VALGRIND $VALGRINDOPTS $LIBDIR/torcs-bin -l $LOCAL_CONF -L $LIBDIR -D $DATADIR $*
+      ;;
+
+  # GIUSE - valgrind and massif profiling option
+	-m) shift
+      echo -e "\t PROFILING WITH VALGRIND AND MASSIF\n"
+      VALGRIND="valgrind"
+      MASSIFOPTS='--tool=massif --max-snapshots=1000 --massif-out-file=/home/giuse/torcs-visual-server/massif-out' #"--time-unit=ms --threshold=0.1"
+      $VALGRIND $MASSIFOPTS $LIBDIR/torcs-bin -l $LOCAL_CONF -L $LIBDIR -D $DATADIR $*
+      ;;
+
 	-h)
 	    echo "usage: torcs [-l|-d|-e]"
 	    echo "   -l  list the dynamically linked libraries"

@@ -70,6 +70,12 @@ extern void GfInit(void);
 
 #define freez FREEZ
 
+// GIUSE - why not at this point
+#define fr33z freez
+// GIUSE - and of course
+#define FR33Z fr33z
+// muthafuckaaaahhh
+
 const double PI = 3.14159265358979323846;  /**< PI */
 const tdble G = 9.80665f; /**< m/s/s */
 

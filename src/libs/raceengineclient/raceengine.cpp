@@ -624,6 +624,10 @@ ReRaceRules(tCarElt *car)
 	    if (!(rules->ruleState & RM_PNST_STNGO)) {
 		sprintf(buf, "%s STOP&GO PENALTY", car->_name);
 		ReRaceMsgSet(buf, 5);
+		
+		// GIUSE - free for all! trying to limit the memory leaks...
+		free(penalty);
+		
 		penalty = (tCarPenalty*)calloc(1, sizeof(tCarPenalty));
 		penalty->penalty = RM_PENALTY_STOPANDGO;
 		penalty->lapToClear = car->_laps + 5;
@@ -639,6 +643,10 @@ ReRaceRules(tCarElt *car)
 	if (!(rules->ruleState & RM_PNST_STNGO)) {
 	    sprintf(buf, "%s STOP&GO PENALTY", car->_name);
 	    ReRaceMsgSet(buf, 5);
+		
+		// GIUSE - free for all! trying to limit the memory leaks...
+		free(penalty);
+		
 	    penalty = (tCarPenalty*)calloc(1, sizeof(tCarPenalty));
 	    penalty->penalty = RM_PENALTY_STOPANDGO;
 	    penalty->lapToClear = car->_laps + 5;
@@ -652,6 +660,10 @@ ReRaceRules(tCarElt *car)
 	    sprintf(buf, "%s DRIVE THROUGH PENALTY", car->_name);
 	    ReRaceMsgSet(buf, 5);
 	    rules->ruleState |= RM_PNST_SPD;
+		
+		// GIUSE - free for all! trying to limit the memory leaks...
+		free(penalty);
+		
 	    penalty = (tCarPenalty*)calloc(1, sizeof(tCarPenalty));
 	    penalty->penalty = RM_PENALTY_DRIVETHROUGH;
 	    penalty->lapToClear = car->_laps + 5;
@@ -749,6 +761,9 @@ ReStart(void)
         ReInfo->vision->sw = ReInfo->vision->sh = ReInfo->vision->vw = ReInfo->vision->vh = GIUSEIMGSIZE;
     
       ReInfo->vision->imgsize = ReInfo->vision->vw * ReInfo->vision->vh;
+
+      free(ReInfo->vision->img);
+		
       ReInfo->vision->img = (unsigned char*)malloc(ReInfo->vision->imgsize * sizeof(unsigned char));
       if (ReInfo->vision->img == NULL)  exit(-1); // malloc fail
 
