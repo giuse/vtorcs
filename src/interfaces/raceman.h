@@ -54,7 +54,7 @@ typedef int (*tfRmRunState) (struct RmInfo *);
 
 
 #define RCM_MAX_DT_SIMU		0.002
-#define RCM_MAX_DT_ROBOTS	0.02
+#define RCM_MAX_DT_ROBOTS	0.2
 
 /** General info on current race */
 typedef struct {

@@ -46,7 +46,7 @@ init_args(int argc, char **argv)
 
     while (i < argc) {
 //    printf("arg %d: %s\n",i,argv[i]);
-	if (strncmp(argv[i], "-l", 2) == 0) {
+	if (strncmp(argv[i], "-c", 2) == 0) {
 	    i++;
 	    if (i < argc) {
 		buf = (char *)malloc(strlen(argv[i]) + 2);

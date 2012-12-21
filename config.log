@@ -14,7 +14,7 @@ hostname = 990
 uname -m = x86_64
 uname -r = 2.6.32-5-amd64
 uname -s = Linux
-uname -v = #1 SMP Mon Jan 16 16:22:28 UTC 2012
+uname -v = #1 SMP Sun Sep 23 10:07:46 UTC 2012
 
 /usr/bin/uname -p = unknown
 /bin/uname -X     = unknown
