@@ -1,0 +1,8 @@
+BUILD
+*.o
+*.so
+*.depend
+*.spec
+*.a
+*-bin
+src/libs/txml/gennmtab/gennmtab

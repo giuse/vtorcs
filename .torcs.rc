@@ -1,2 +1,2 @@
-TORCS_BASE = /home/koutnij/git/torcs-visual-server
-MAKE_DEFAULT = /home/koutnij/git/torcs-visual-server/Make-default.mk
+TORCS_BASE = /home/giuse/PHD-code/visual-server
+MAKE_DEFAULT = /home/giuse/PHD-code/visual-server/Make-default.mk

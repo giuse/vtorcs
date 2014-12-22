@@ -1,1 +1,1 @@
-/home/koutnij/git/torcs-visual-server/src/libs/confscreens/controlconfig.h
+/home/giuse/PHD-code/visual-server/src/libs/confscreens/controlconfig.h
